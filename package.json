@@ -67,6 +67,7 @@
     "cli.js",
     "index.js",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "docs/"
   ]
 }
