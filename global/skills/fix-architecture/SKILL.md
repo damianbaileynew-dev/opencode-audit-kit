@@ -247,3 +247,24 @@ grep -q "require.*config" src/server.js || echo "❌ KRİTİK: server.js'te conf
 - **Kalan Sorunlar:**
 - **Sonraki Ajan İçin Öneri:** Test audit'e geç
 ```
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "Service layer is overkill for this project" | Any project with more than 5 route handlers benefits from service extraction. It's not overkill, it's separation of concerns. |
+| "Config in server.js is fine for now" | "Now" becomes "forever". Extracting config is a 5-minute task that prevents bugs from hardcoded values. |
+| "The helper function is already in server.js" | Inline helpers couple business logic to HTTP handling. Extract to a service file for testability and reuse. |
+| "We'll refactor later" | Later never comes. Each new feature adds more coupling, making refactoring harder. Do it now. |
+| "Separate files add complexity" | God files add more complexity. A 500-line server.js is harder to understand than 5 focused files. |
+| "This is too simple for a config file" | Simple today, complex tomorrow. Config externalization is a habit, not a threshold. |
+
+## Red Flags
+
+- 🔴 No service layer (all business logic in route handlers)
+- 🔴 No config file (hardcoded values in server.js)
+- 🔴 God file (>300 lines in a single file doing everything)
+- 🔴 Circular dependencies between modules
+- 🔴 Business logic tightly coupled to HTTP framework
+- 🔴 Global mutable state shared across handlers
+- 🔴 No error handling standardization

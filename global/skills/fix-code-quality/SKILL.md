@@ -191,3 +191,25 @@ grep "password.*<.*[67]\|password.*length.*[67]" src/server.js && echo "❌ KRİ
 - **Kalan Sorunlar:**
 - **Sonraki Ajan İçin Öneri:** Architecture audit'e geç
 ```
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "Password min 8 chars is too restrictive" | OWASP recommends minimum 8 characters. Short passwords can be brute-forced in seconds. |
+| "var is fine for simple scripts" | var has function scoping issues and hoisting bugs. Use const by default, let when reassignment is needed. |
+| "Magic numbers are readable in context" | Context fades. Named constants are self-documenting and prevent duplicate magic values. |
+| "We'll clean up imports later" | Dead imports increase bundle size and confuse readers. Remove them now — it takes seconds. |
+| "Console.log is fine for production" | Console.log in production leaks information and clutters logs. Use structured logging. |
+| "Short variable names are fine if the function is small" | Small functions grow. `u` becomes ambiguous in a 20-line function. Use descriptive names. |
+
+## Red Flags
+
+- 🔴 Password validation allowing < 8 characters
+- 🔴 `var` declarations (should be `const`/`let`)
+- 🔴 Magic numbers without named constants
+- 🔴 Unused imports in source files
+- 🔴 Console.log in production code
+- 🔴 Cryptic variable names (`u`, `d`, `x`) without context
+- 🔴 Missing error messages in catch blocks
+- 🔴 Functions with > 50 lines doing multiple things

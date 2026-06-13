@@ -249,3 +249,21 @@ test -f README.md || echo "❌ README.md YOK!"
 ```
 
 🚨🚨🚨 EĞER herhangi bir kontrol başarısız olursa → HEMEN düzelt! ATLAMA!
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "Decorators handle everything" | Decorators only work if they're applied. Missing @UseGuards() on a controller means no auth. Verify every endpoint. |
+| "NestJS is secure by default" | NestJS provides tools, not defaults. You must add Guards, ValidationPipes, DTOs, and ThrottlerModule explicitly. |
+| "DTO validation is overkill for internal APIs" | Internal APIs get called from compromised hosts. Validate everywhere with class-validator decorators. |
+| "Guards are too verbose" | Verbose but correct beats concise but vulnerable. Apply @UseGuards() consistently on all protected routes. |
+
+## Red Flags
+
+- 🔴 No ValidationPipe (global or per-route)
+- 🔴 DTOs without class-validator decorators
+- 🔴 Controllers without auth guards
+- 🔴 No ThrottlerModule for rate limiting
+- 🔴 Exception filters exposing internal details
+- 🔴 No RolesGuard for admin endpoints

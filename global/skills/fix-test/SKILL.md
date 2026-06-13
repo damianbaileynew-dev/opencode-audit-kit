@@ -321,6 +321,132 @@ describe('API Integration Tests', () => {
 5. ✅ CI pipeline düzgün çalışıyor
 6. ✅ `supertest` package.json'da mevcut
 
+## The Prove-It Pattern (from Addy Osmani agent-skills)
+
+When a bug is reported, **do not start by trying to fix it.** Start by writing a test that reproduces it.
+
+```
+Bug report arrives
+      │
+      ▼
+Write a test that demonstrates the bug
+      │
+      ▼
+Test FAILS (confirming the bug exists)
+      │
+      ▼
+Implement the fix
+      │
+      ▼
+Test PASSES (proving the fix works)
+      │
+      ▼
+Run full test suite (no regressions)
+```
+
+**Example:**
+```javascript
+// Bug: "Completing a task doesn't update the completedAt timestamp"
+
+// Step 1: Write the reproduction test (it should FAIL)
+it('sets completedAt when task is completed', async () => {
+  const task = await taskService.createTask({ title: 'Test' });
+  const completed = await taskService.completeTask(task.id);
+
+  expect(completed.status).toBe('completed');
+  expect(completed.completedAt).toBeInstanceOf(Date); // This fails → bug confirmed
+});
+
+// Step 2: Fix the bug
+export async function completeTask(id) {
+  return db.tasks.update(id, {
+    status: 'completed',
+    completedAt: new Date(), // This was missing
+  });
+}
+
+// Step 3: Test passes → bug fixed, regression guarded
+```
+
+## The Test Pyramid
+
+```
+     ╱╲
+    ╱  ╲  E2E Tests (~5%)
+   ╱    ╲ Full user flows, real browser
+  ╱──────╲
+ ╱        ╲ Integration Tests (~15%)
+╱          ╲ Component interactions, API boundaries
+╱────────────╲
+╱              ╲ Unit Tests (~80%)
+╱                ╲ Pure logic, isolated, milliseconds each
+╱──────────────────╲
+```
+
+### Test Sizes (Resource Model)
+
+| Size | Constraints | Speed | Example |
+|------|-------------|-------|---------|
+| **Small** | Single process, no I/O, no network, no DB | Milliseconds | Pure function tests, data transforms |
+| **Medium** | Multi-process OK, localhost only, no external services | Seconds | API tests with test DB, component tests |
+| **Large** | Multi-machine OK, external services allowed | Minutes | E2E tests, performance benchmarks |
+
+### DAMP Over DRY in Tests
+
+In production code, DRY (Don't Repeat Yourself) is usually right. In tests, **DAMP** (Descriptive And Meaningful Phrases) is better. Each test should tell a complete story without requiring the reader to trace through shared helpers.
+
+```javascript
+// DAMP: Each test is self-contained and readable
+it('rejects tasks with empty titles', () => {
+  const input = { title: '', assignee: 'user-1' };
+  expect(() => createTask(input)).toThrow('Title is required');
+});
+
+it('trims whitespace from titles', () => {
+  const input = { title: ' Buy groceries ', assignee: 'user-1' };
+  const task = createTask(input);
+  expect(task.title).toBe('Buy groceries');
+});
+```
+
+### Preference Order for Test Doubles
+
+```
+1. Real implementation → Highest confidence, catches real bugs
+2. Fake → In-memory version of a dependency (e.g., fake DB)
+3. Stub → Returns canned data, no behavior
+4. Mock (interaction) → Verifies method calls — use sparingly
+```
+
+**The Beyonce Rule:** If you liked it, you should have put a test on it. Infrastructure changes, refactoring, and migrations are not responsible for catching your bugs — your tests are. If a change breaks your code and you didn't have a test for it, that's on you.
+
+## Reference Files
+
+For detailed checklists, see:
+- **Testing Patterns**: `references/testing-patterns.md` — Test doubles, edge cases, naming conventions, mock strategies
+- **Performance Checklist**: `references/performance-checklist.md` — Performance testing patterns
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "We'll add tests later" | Later never comes. Code without tests is a liability. Write tests now. |
+| "Integration tests are too slow" | Slow tests that catch real bugs beat fast tests that catch nothing. Use the test pyramid: 80% unit, 15% integration, 5% E2E. |
+| "This code is too simple to test" | Simple code breaks too. Off-by-one errors, null checks, edge cases happen in "simple" code. |
+| "We don't have time for TDD" | TDD saves time by preventing bugs and reducing debugging. Red-Green-Refactor is faster than code-then-debug. |
+| "Mocks are sufficient" | Over-mocking creates tests that pass while production breaks. Prefer real implementations and fakes. |
+| "100% coverage is the goal" | Coverage measures quantity, not quality. Meaningful tests on critical paths beat 100% coverage on trivial code. |
+
+## Red Flags
+
+- 🔴 No test script in package.json
+- 🔴 No integration tests (only unit tests)
+- 🔴 Tests that mock everything and test nothing real
+- 🔴 No edge case tests (empty input, null, boundary values)
+- 🔴 Tests that are tightly coupled to implementation details
+- 🔴 No CI pipeline running tests on every push
+- 🔴 Bug fixes without regression tests
+
 ## Adım 5: Rapor Yaz
 
 `reports/test/test-fix-YYYYMMDD.md`:

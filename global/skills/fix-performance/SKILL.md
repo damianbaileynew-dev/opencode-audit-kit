@@ -242,3 +242,52 @@ app.get("/api/search", auth, asyncHandler(async (req, res) => {
 - **Kalan Sorunlar:**
 - **Sonraki Ajan İçin Öneri:** Code quality audit'e geç
 ```
+
+## The Optimization Workflow (from Addy Osmani agent-skills)
+
+```
+1. MEASURE → Establish baseline with real data
+2. IDENTIFY → Find the actual bottleneck (not assumed)
+3. FIX → Address the specific bottleneck
+4. VERIFY → Measure again, confirm improvement
+5. GUARD → Add monitoring or tests to prevent regression
+```
+
+**Where to Start:**
+```
+What is slow?
+├── API response time
+│   ├── N+1 queries? → Batch or join queries
+│   ├── No pagination? → Add page/limit with metadata
+│   ├── Sync I/O? → Convert to async
+│   └── Client-side aggregation? → Move to DB query
+├── Page load
+│   ├── Large bundle? → Code splitting, tree shaking
+│   ├── No lazy loading? → Add loading="lazy" to images
+│   └── Render-blocking resources? → Defer non-critical CSS/JS
+└── Memory
+    ├── Unbounded caches? → Add TTL and size limits
+    └── Leaked references? → Check event listeners, closures
+```
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "Pagination isn't needed for this dataset" | Datasets grow. Unbounded queries will crash when data scales. Add pagination now. |
+| "Sync file writes are fine for small data" | Small data grows. Sync writes block the event loop. Use async from the start. |
+| "We'll optimize later" | Performance debt compounds. Each new feature makes optimization harder. Measure now, fix now. |
+| "Lazy loading adds complexity" | Not lazy loading adds seconds to page load. One `loading="lazy"` attribute costs nothing. |
+| "Premature optimization is the root of all evil" | That quote says "premature" — measuring and adding pagination isn't premature, it's engineering. |
+| "N+1 queries aren't a problem at this scale" | N+1 queries are O(n) database calls. Scale from 10 to 1000 users and your DB dies. Fix it now. |
+
+## Red Flags
+
+- 🔴 No pagination on list/search endpoints
+- 🔴 Synchronous file I/O in request handlers
+- 🔴 N+1 query patterns
+- 🔴 Missing `loading="lazy"` on below-fold images
+- 🔴 All JavaScript loaded upfront (no code splitting)
+- 🔴 Client-side data aggregation that should be server-side
+- 🔴 No caching headers on static assets
+- 🔴 Inefficient sorting algorithms (verbose comparisons instead of simple math)

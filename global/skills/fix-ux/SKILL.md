@@ -243,3 +243,24 @@ CSS: `.spinner { border: 3px solid #eee; border-top: 3px solid #333; border-radi
 - **Kalan Sorunlar:**
 - **Sonraki Ajan İçin Öneri:** DevOps audit'e geç
 ```
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "Loading spinners aren't needed for fast APIs" | APIs aren't always fast. Network drops, cold starts, heavy queries. Show the user something is happening. |
+| "Mobile users can pinch-zoom" | Pinch-zoom is not responsive design. Content should be readable and interactive at any viewport size. |
+| "Empty states are edge cases" | Every user sees empty states on first use. They're the first impression, not an edge case. |
+| "We'll fix UX later" | UX debt accumulates like technical debt. Each missing interaction makes the product harder to use and harder to fix. |
+| "The button works, it just doesn't show it" | If the user can't see that their action worked, it didn't work from their perspective. Visual feedback is mandatory. |
+| "Responsive design breaks the desktop layout" | Responsive design *adapts* the layout. Use `@media` queries to adjust, not replace. |
+
+## Red Flags
+
+- 🔴 No loading state (user clicks and nothing happens visually)
+- 🔴 No error feedback (errors silently fail or show browser default)
+- 🔴 No empty state (blank screen when no data)
+- 🔴 No `@media` queries (broken on mobile)
+- 🔴 Non-functional buttons (onClick does nothing)
+- 🔴 Login state not reflected in UI (login but UI still shows "Login")
+- 🔴 No search functionality or search doesn't work

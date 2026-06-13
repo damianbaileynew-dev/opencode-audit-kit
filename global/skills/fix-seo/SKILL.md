@@ -221,3 +221,25 @@ Sitemap: https://taskflow.app/sitemap.xml
 - **Semantic HTML:** X element düzeltildi
 - **Sonraki Ajan İçin Öneri:** Documentation audit'e geç
 ```
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "SEO isn't important for internal tools" | Internal tools still get searched. Intranet search, knowledge bases, and documentation all benefit from proper SEO. |
+| "Meta descriptions don't affect ranking" | They affect click-through rate, which affects traffic. A good meta description can double your CTR. |
+| "JSON-LD is too complex" | JSON-LD is just a script tag with structured data. It's 10 lines of JSON that makes your site eligible for rich results. |
+| "We don't need a robots.txt" | Without robots.txt, crawlers index everything including API endpoints and admin pages. It's 3 lines of configuration. |
+| "Semantic HTML doesn't matter" | Search engines use semantic HTML to understand page structure. `<article>` means more than `<div class="article">`. |
+| "Canonical URLs aren't needed for single-page sites" | Canonical URLs prevent duplicate content issues from www/non-www, HTTP/HTTPS, and trailing slash variations. |
+
+## Red Flags
+
+- 🔴 No meta description tag
+- 🔴 No canonical URL
+- 🔴 No Open Graph tags (broken social sharing)
+- 🔴 No JSON-LD structured data
+- 🔴 Div soup instead of semantic HTML (header, nav, main, footer)
+- 🔴 No robots.txt
+- 🔴 Multiple `<h1>` tags on a single page
+- 🔴 Missing or duplicate title tags

@@ -148,3 +148,21 @@ After all fixes verify:
 4. src/middleware.js exists with rate limiting
 5. next.config.js has security headers
 6. public/robots.txt exists
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "Next.js handles security automatically" | Next.js provides the framework, not security defaults. You must add middleware for rate limiting, security headers in next.config.js, and sanitize all user input. |
+| "Server Components are secure by default" | Server Components run on the server but still handle user input. Validate and sanitize all props and searchParams. |
+| "We don't need middleware — API routes handle auth" | Middleware runs before route handlers, enabling rate limiting, auth checks, and redirects at the edge. Without it, you're missing a critical defense layer. |
+| "next.config headers are optional" | Security headers (CSP, HSTS, X-Frame-Options) prevent clickjacking, XSS, and MITM attacks. They're not optional in production. |
+
+## Red Flags
+
+- 🔴 No middleware.ts with rate limiting
+- 🔴 No security headers in next.config.js
+- 🔴 dangerouslySetInnerHTML with user data
+- 🔴 No src/lib/ service layer (business logic in route handlers)
+- 🔴 Missing robots.txt in public/
+- 🔴 No metadata export for SEO (title, description, openGraph)

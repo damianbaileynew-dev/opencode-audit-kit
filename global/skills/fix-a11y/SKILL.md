@@ -190,3 +190,30 @@ Her fix için:
 - **WCAG Compliance:** X/A düzeltildi
 - **Sonraki Ajan İçin Öneri:** UX audit'e geç
 ```
+
+## Reference Files
+
+For detailed checklists, see:
+- **Accessibility Checklist**: `references/accessibility-checklist.md` — WCAG 2.1 AA criteria, screen reader testing, ARIA patterns
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "We don't have blind users" | You don't know who your users are. Accessibility also helps: motor-impaired users, situational impairments (bright sun, noisy room), SEO, and legal compliance. |
+| "ARIA is too complex" | Most accessibility is just good HTML: labels, headings, alt text. ARIA is for custom widgets, not basic forms. |
+| "Screen readers will figure it out" | They won't. Without proper labels, roles, and structure, screen readers announce gibberish. |
+| "Alt text isn't important for decorative images" | Decorative images should have `alt=""` or `role="presentation"`. Missing alt makes screen readers announce the filename. |
+| "Keyboard navigation is a nice-to-have" | Keyboard navigation is required by WCAG 2.1 AA. It also helps power users and is a legal requirement in many jurisdictions. |
+| "We'll fix accessibility after launch" | Accessibility retrofitting costs 10x more than building it in from the start. Fix it now. |
+
+## Red Flags
+
+- 🔴 Form inputs without associated labels
+- 🔴 Images without alt text
+- 🔴 Modals that can't be closed with ESC key
+- 🔴 No skip-to-content link
+- 🔴 Missing `lang` attribute on `<html>`
+- 🔴 Low color contrast ratios
+- 🔴 Interactive elements not reachable via keyboard
+- 🔴 Dynamic content changes not announced to screen readers

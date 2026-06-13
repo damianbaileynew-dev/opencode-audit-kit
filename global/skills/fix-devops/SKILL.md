@@ -297,3 +297,23 @@ process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 - **Oluşturulan Yeni Dosyalar:**
 - **Sonraki Ajan İçin Öneri:** SEO audit'e geç
 ```
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "Health endpoints aren't needed for small apps" | Small apps become big apps. Health endpoints are 5 lines of code that enable monitoring, load balancer checks, and zero-downtime deployments. |
+| "Graceful shutdown is overkill" | Without graceful shutdown, in-flight requests get dropped on deploy. Users see 500 errors. It's 10 lines of code. |
+| "Docker is too complex for this project" | Docker ensures consistency. "Works on my machine" is not a deployment strategy. A simple Dockerfile is 10 lines. |
+| "CI isn't needed — we test locally" | Local testing misses regressions from main branch merges. CI catches them before they reach production. |
+| "We'll add monitoring later" | Later means after the first outage. Add health checks and structured logging now — before you need them. |
+
+## Red Flags
+
+- 🔴 No health endpoint (`/health` or `/ready`)
+- 🔴 No graceful shutdown handler
+- 🔴 No Dockerfile
+- 🔴 No CI pipeline
+- 🔴 No environment-based configuration
+- 🔴 Process crashes on unhandled promise rejections
+- 🔴 No structured logging

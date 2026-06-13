@@ -366,6 +366,93 @@ app.use((err, req, res, next) => { ... })
 4. ✅ `CONTRIBUTING.md` mevcut
 5. ✅ `.env.example` mevcut
 
+## Architecture Decision Records (ADR) Template (from Addy Osmani agent-skills)
+
+ADRs capture the reasoning behind significant technical decisions. They're the highest-value documentation you can write.
+
+### When to Write an ADR
+- Choosing a framework, library, or major dependency
+- Designing a data model or database schema
+- Selecting an authentication strategy
+- Deciding on an API architecture (REST vs GraphQL vs tRPC)
+- Any decision that would be expensive to reverse
+
+### ADR Template
+
+Store ADRs in `docs/decisions/` with sequential numbering:
+
+```markdown
+# ADR-001: [Decision Title]
+
+## Status
+Accepted | Superseded by ADR-XXX | Deprecated
+
+## Date
+YYYY-MM-DD
+
+## Context
+What is the issue that we're seeing that is motivating this decision or change?
+Include technical and business requirements.
+
+## Decision
+What is the change that we're proposing and/or doing?
+
+## Alternatives Considered
+
+### [Alternative 1]
+- Pros: ...
+- Cons: ...
+- Rejected because: ...
+
+### [Alternative 2]
+- Pros: ...
+- Cons: ...
+- Rejected because: ...
+
+## Consequences
+What becomes easier or more difficult to do because of this change?
+- Positive: ...
+- Negative: ...
+- Risk: ...
+```
+
+### ADR Lifecycle
+```
+PROPOSED → ACCEPTED → (SUPERSEDED or DEPRECATED)
+```
+
+- **Don't delete old ADRs.** They capture historical context.
+- When a decision changes, write a new ADR that references and supersedes the old one.
+
+### Documentation for Agents
+
+Special consideration for AI agent context:
+- **CLAUDE.md / rules files** — Document project conventions so agents follow them
+- **Spec files** — Keep specs updated so agents build the right thing
+- **ADRs** — Help agents understand why past decisions were made (prevents re-deciding)
+- **Inline gotchas** — Prevent agents from falling into known traps
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "The code is self-documenting" | Code shows what. It doesn't show why, what alternatives were rejected, or what constraints apply. |
+| "We'll write docs when the API stabilizes" | APIs stabilize faster when you document them. The doc is the first test of the design. |
+| "Nobody reads docs" | Agents do. Future engineers do. Your 3-months-later self does. |
+| "ADRs are overhead" | A 10-minute ADR prevents a 2-hour debate about the same decision six months later. |
+| "Comments get outdated" | Comments on *why* are stable. Comments on *what* go stale. Document decisions, not mechanics. |
+| "README is enough" | README gets you started. API.md tells you how to use it. ADR tells you why it was built this way. |
+
+## Red Flags
+
+- 🔴 No README.md or empty README
+- 🔴 No API documentation for public endpoints
+- 🔴 No inline comments on complex business logic
+- 🔴 No .env.example (secrets leak or developers guess)
+- 🔴 No CONTRIBUTING.md (new contributors can't onboard)
+- 🔴 Outdated documentation that contradicts the code
+- 🔴 No record of why architectural decisions were made
+
 ## Adım 5: Rapor Yaz
 
 `reports/documentation/docs-fix-YYYYMMDD.md`:

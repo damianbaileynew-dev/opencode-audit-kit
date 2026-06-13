@@ -88,6 +88,92 @@ Automated scanners: `references/automated-scanning.md`.
 - **NEVER** interpolate `${{ inputs.* }}` / `${{ github.event.* }}` in `run:` — use `env:`
 - Dependency triage: upgrade > override > dismiss. Full patterns: `references/gha-security.md`.
 
+## STRIDE Threat Modeling (Start Every Audit)
+
+Before scanning for patterns, spend 5 minutes thinking like an attacker. Controls without a threat model are guesses.
+
+**Step 1: Map Trust Boundaries** — Where does untrusted data enter?
+- HTTP requests, form fields, file uploads, webhooks, third-party APIs, message queues, **LLM output**
+- Every boundary is attack surface
+
+**Step 2: Name the Assets** — What's worth stealing or breaking?
+- Credentials, PII, payment data, admin actions, money movement
+
+**Step 3: Run STRIDE per boundary:**
+
+| Threat | Ask | Typical Mitigation |
+|--------|-----|--------------------|
+| **S**poofing | Can someone impersonate a user/service? | Authentication, signature verification |
+| **T**ampering | Can data be altered in transit or at rest? | Integrity checks, parameterized queries, HTTPS |
+| **R**epudiation | Can an action be denied later? | Audit logging of security events |
+| **I**nformation disclosure | Can data leak? | Encryption, field allowlists, generic errors |
+| **D**enial of service | Can it be overwhelmed? | Rate limiting, input size caps, timeouts |
+| **E**levation of privilege | Can a user gain rights they shouldn't? | Authorization checks, least privilege |
+
+**Step 4: Write abuse cases next to use cases.** For each feature ask: "How would I misuse this?" — make that your first test.
+
+If you can't name the trust boundaries for a feature, you're not ready to secure it. This is OWASP **A04: Insecure Design**.
+
+## Three-Tier Boundary System
+
+### Always Do (No Exceptions)
+- Validate all external input at the system boundary
+- Parameterize all database queries — never concatenate user input into SQL
+- Encode output to prevent XSS (use framework auto-escaping, don't bypass it)
+- Use HTTPS for all external communication
+- Hash passwords with bcrypt/scrypt/argon2 (never store plaintext)
+- Set security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options)
+- Use httpOnly, secure, sameSite cookies for sessions
+- Run `npm audit` (or equivalent) before every release
+
+### Ask First (Requires Human Approval)
+- Adding new authentication flows or changing auth logic
+- Storing new categories of sensitive data (PII, payment info)
+- Adding new external service integrations
+- Changing CORS configuration
+- Adding file upload handlers
+- Modifying rate limiting or throttling
+- Granting elevated permissions or roles
+
+### Never Do
+- Never commit secrets to version control (API keys, passwords, tokens)
+- Never log sensitive data (passwords, tokens, full credit card numbers)
+- Never trust client-side validation as a security boundary
+- Never disable security headers for convenience
+- Never use `eval()` or `innerHTML` with user-provided data
+- Never store sessions in client-accessible storage (localStorage for auth tokens)
+- Never expose stack traces or internal error details to users
+
+## Reference Files
+
+For detailed checklists, see:
+- **Security Checklist**: `references/security-checklist.md` — OWASP Top 10, LLM Top 10, pre-commit checks, auth, CORS
+- **Testing Patterns**: `references/testing-patterns.md` — Test doubles, edge cases, naming conventions
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "Input validation isn't needed on internal APIs" | Internal APIs get called from compromised hosts, SSRF, or are exposed accidentally. Validate everywhere. |
+| "We'll add security headers later" | Later never comes. One missing header can enable clickjacking or XSS. Add them now. |
+| "This endpoint doesn't handle sensitive data" | Today it doesn't. Tomorrow it will. Secure by default. |
+| "The framework handles XSS automatically" | Framework escaping only works if you don't bypass it with `innerHTML`, `v-html`, or `dangerouslySetInnerHTML`. |
+| "Rate limiting isn't needed for this scale" | Rate limiting prevents abuse at any scale. 10 requests/second from one IP is abuse. |
+| "OWASP is overkill for this project" | OWASP patterns are minimal viable security. Skipping them means accepting known vulnerabilities. |
+
+## Red Flags
+
+- 🔴 Unparameterized SQL queries with string concatenation
+- 🔴 Passwords stored in plaintext or with weak hashing (MD5, SHA-1)
+- 🔴 `eval()`, `innerHTML`, or `dangerouslySetInnerHTML` with user input
+- 🔴 CORS set to `*` in production
+- 🔴 Secrets hardcoded in source code
+- 🔴 No authentication check on sensitive endpoints
+- 🔴 Stack traces exposed in error responses
+- 🔴 No rate limiting on login/auth endpoints
+- 🔴 File uploads without type/size validation
+- 🔴 Missing security headers (no helmet, no CSP)
+
 ## Verification
 
 ```bash
@@ -96,7 +182,12 @@ Automated scanners: `references/automated-scanning.md`.
 ./scripts/github-security-audit.sh owner/repo            # GH repo
 ```
 
-Dispatcher detects the stack from indicator files and runs matching `scripts/scanners/*.sh` (17 ecosystems; see `references/` index).
+After automated scan, verify STRIDE coverage:
+- [ ] All trust boundaries identified and documented
+- [ ] Each boundary has controls for applicable STRIDE threats
+- [ ] No "Never Do" patterns found in codebase
+- [ ] All "Always Do" items confirmed present
+- [ ] Abuse cases written for critical features
 
 ---
 

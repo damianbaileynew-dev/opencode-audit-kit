@@ -9,9 +9,9 @@ description: >-
 
 **Amaç:** Güvenli ve düşük riskli backend sorunlarını çözmek.
 
-## Güvenli Fix Sınırları
+## Three-Tier Boundary System (from Addy Osmani agent-skills)
 
-### ✅ Otomatik Yapılabilir
+### ✅ Always Do (No Exceptions — Otomatik Yapılabilir)
 - Input validation ekleme
 - Error handling ekleme (try/catch)
 - SQL injection → parametric query'e çevirme
@@ -31,12 +31,25 @@ description: >-
 - **CSP header ekleme** — helmet.contentSecurityPolicy() yapılandırması
 - **CSRF protection ekleme** — `csurf` veya custom CSRF token middleware + SameSite cookie kombinasyonu
 
-### ❌ Onay Gerekli
+### ⚠️ Ask First (Onay Gerekli)
 - Database schema değişikliği
 - Auth sisteminin yeniden yazılması
 - Yeni API endpoint ekleme
 - Breaking API change
 - **Büyük/bilinmeyen bağımlılıklar** (helmet, rate-limit, cors dışındakiler)
+- New authentication flows or changing auth logic
+- Storing new categories of sensitive data (PII, payment info)
+- Changing CORS configuration
+- Adding file upload handlers
+
+### 🚫 Never Do
+- Never commit secrets to version control
+- Never log sensitive data (passwords, tokens)
+- Never trust client-side validation as a security boundary
+- Never disable security headers for convenience
+- Never use `eval()` or `innerHTML` with user-provided data
+- Never store auth tokens in localStorage (use httpOnly cookies)
+- Never expose stack traces or internal error details to users
 
 ---
 
@@ -254,3 +267,27 @@ function updateTask(id, updates) {
 - **Kalan Sorunlar:**
 - **Sonraki Ajan İçin Öneri:** UX critic'e geç
 ```
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "Input validation isn't needed on internal APIs" | Internal APIs get called from compromised hosts, SSRF, or are exposed accidentally. Validate everywhere. |
+| "We'll add security headers later" | Later never comes. One missing header can enable clickjacking or XSS. Add them now. |
+| "Rate limiting isn't needed for this scale" | Rate limiting prevents abuse at any scale. 10 requests/second from one IP is abuse. |
+| "httpOnly cookies are too complex" | localStorage for auth tokens is a known XSS vector. httpOnly cookies are the standard. |
+| "bcrypt salt 8 rounds is fine" | OWASP recommends ≥10. 8 rounds can be brute-forced with modern GPUs. |
+| "This endpoint doesn't handle sensitive data" | Today it doesn't. Tomorrow it will. Secure by default. |
+
+## Red Flags
+
+- 🔴 Unparameterized SQL queries with string concatenation
+- 🔴 Passwords stored in plaintext or with weak hashing (MD5, SHA-1, bcrypt <10 rounds)
+- 🔴 `eval()`, `innerHTML`, or `dangerouslySetInnerHTML` with user input
+- 🔴 CORS set to `*` in production
+- 🔴 Secrets hardcoded in source code
+- 🔴 No authentication check on sensitive endpoints
+- 🔴 Stack traces exposed in error responses
+- 🔴 No rate limiting on login/auth endpoints
+- 🔴 File uploads without type/size validation
+- 🔴 Missing security headers (no helmet, no CSP)

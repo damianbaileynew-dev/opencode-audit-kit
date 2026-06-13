@@ -887,3 +887,50 @@ onCLS(console.log);
 ## References
 
 For Core Web Vitals specific optimizations, see [Core Web Vitals](../core-web-vitals/SKILL.md).
+
+## Reference Files
+
+For detailed checklists, see:
+- **Performance Checklist**: `references/performance-checklist.md` — Bundle analysis, profiling workflow, anti-patterns
+- **Testing Patterns**: `references/testing-patterns.md` — Test doubles, edge cases, naming conventions
+
+## Common Rationalizations
+
+**Where to Start Measuring:**
+```
+What is slow?
+├── First page load
+│   ├── Large bundle? → Measure bundle size, check code splitting
+│   ├── Slow server response? → Measure TTFB in DevTools Network waterfall
+│   └── Render-blocking resources? → Check network waterfall for CSS/JS blocking
+├── Interaction feels sluggish
+│   ├── UI freezes on click? → Profile main thread, look for long tasks (>50ms)
+│   └── Animation jank? → Check layout thrashing, forced reflows
+├── Backend / API
+│   ├── Single endpoint slow? → Profile database queries, check indexes
+│   ├── All endpoints slow? → Check connection pool, memory, CPU
+│   └── Intermittent slowness? → Check for lock contention, GC pauses
+```
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "It's fast enough on my machine" | Your machine isn't a mid-range phone on 3G. Measure on real devices with throttled networks. |
+| "We'll optimize later" | Performance debt compounds. Every new feature makes optimization harder. Measure now, fix now. |
+| "Pagination isn't needed for this dataset" | Datasets grow. Unbounded queries will crash when data scales. Add pagination now. |
+| "Premature optimization is the root of all evil" | That quote says "premature" — measuring and adding pagination isn't premature, it's engineering. |
+| "Lazy loading adds complexity" | Not lazy loading adds seconds to page load. One `loading="lazy"` attribute costs nothing. |
+| "Sync file writes are fine for small data" | Small data grows. Sync writes block the event loop. Use async from the start. |
+
+## Red Flags
+
+- 🔴 No pagination on list/search endpoints (unbounded data fetching)
+- 🔴 Synchronous file I/O in request handlers (`writeFileSync`, `readFileSync`)
+- 🔴 N+1 query patterns (one DB query per item in a loop)
+- 🔴 Missing `loading="lazy"` on below-fold images
+- 🔴 All JavaScript loaded upfront (no code splitting)
+- 🔴 No caching headers on static assets
+- 🔴 Large bundle size without tree-shaking
+- 🔴 Database queries without indexes on frequently filtered columns
+- 🔴 Client-side aggregation of data that should be computed server-side

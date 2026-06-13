@@ -974,3 +974,21 @@ grep -rq "SIGTERM\|lifespan\|signal\.signal\|shutdown" app/ main.py src/ || echo
 | # | Kontrol | Durum |
 |---|---------|:-----:|
 ```
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "Pydantic validation is enough" | Pydantic validates input, but you still need: CORS configuration, rate limiting, error sanitization, and auth checks. Validation is one layer, not the whole stack. |
+| "FastAPI handles security automatically" | FastAPI provides tools, not defaults. You must explicitly add CORS middleware, rate limiting, input sanitization, and auth dependencies. |
+| "SQL injection isn't possible with SQLAlchemy" | It IS possible with raw queries, text(), or f-strings. Always use parameterized queries or ORM methods. |
+| "We don't need dependency injection for auth" | Without DI-based auth checks, any developer can forget to add auth to a new endpoint. Use `Depends(get_current_user)` consistently. |
+
+## Red Flags
+
+- 🔴 No Pydantic models for request validation
+- 🔴 Raw SQL queries with f-strings (SQL injection)
+- 🔴 No CORS middleware configured
+- 🔴 Endpoints without auth dependencies
+- 🔴 Exception handlers that expose internal details
+- 🔴 No rate limiting on auth endpoints
