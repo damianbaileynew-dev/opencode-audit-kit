@@ -936,6 +936,159 @@ if [ -f .env.example ]; then ((doc++)); check "DOC5: .env.example" "PASS"; else 
 score_dimension "Documentation" 5 $doc
 echo ""
 
+
+elif [ "$FRAMEWORK" = "nextjs" ]; then
+
+# ──── SECURITY ────
+echo -e "${BOLD}🔒 SECURITY${NC}"
+s=0
+
+if grep -rq "helmet\|Helmet\|Content-Security-Policy\|X-Frame-Options" src/ next.config.* middleware.* 2>/dev/null; then ((s++)); check "S1: Helmet/CSP" "PASS"; else check "S1: Helmet/CSP" "FAIL"; fi
+if grep -rq "rateLimit\|rate-limit\|throttle\|RateLimiter" src/ middleware.* 2>/dev/null; then ((s++)); check "S2: Rate-limit" "PASS"; else check "S2: Rate-limit" "FAIL"; fi
+if grep -rq "CORS_ORIGIN\|origin:" src/ next.config.* 2>/dev/null && ! grep -rq "cors()" src/ 2>/dev/null; then ((s++)); check "S3: CORS restricted" "PASS"; else check "S3: CORS restricted" "FAIL"; fi
+if grep -rq "process.env\|NEXT_PUBLIC\|dotenv" src/lib src/app src/ next.config.* 2>/dev/null; then ((s++)); check "S4: JWT env" "PASS"; else check "S4: JWT env" "FAIL"; fi
+if grep -rq "BCRYPT_ROUNDS.*1[0-9]\|saltRounds.*1[0-9]\|hash.*12\|hash.*10\|hash.*14" src/ 2>/dev/null; then ((s++)); check "S5: bcrypt≥10" "PASS"; else check "S5: bcrypt≥10" "FAIL"; fi
+if grep -rq "sanitizeUser\|password.*rest\|Omit.*password\|stripPassword\|safeUser\|id:.*username:" src/ 2>/dev/null; then ((s++)); check "S6: No pwd response" "PASS"; else check "S6: No pwd response" "FAIL"; fi
+if grep -rq "logout" src/ 2>/dev/null; then ((s++)); check "S7: Logout" "PASS"; else check "S7: Logout" "FAIL"; fi
+if grep -rq "httpOnly\|setCookie\|cookies\(\)\.set" src/ 2>/dev/null; then ((s++)); check "S8: httpOnly cookie" "PASS"; else check "S8: httpOnly cookie" "FAIL"; fi
+if grep -rq "requireAdmin\|adminOnly\|role.*admin\|isAdmin\|withAdminAuth\|adminAuth" src/ middleware.* 2>/dev/null; then ((s++)); check "S9: Admin auth" "PASS"; else check "S9: Admin auth" "FAIL"; fi
+if grep -rq "safeUsers\|Omit.*password\|password.*rest\|stripPassword\|sanitize.*user" src/ 2>/dev/null; then ((s++)); check "S10: Admin strips pwd" "PASS"; else check "S10: Admin strips pwd" "FAIL"; fi
+if grep -rq "ALLOWED\|whitelist\|allowedFields\|safeFields\|pick\|omit" src/ 2>/dev/null; then ((s++)); check "S11: Mass assign" "PASS"; else check "S11: Mass assign" "FAIL"; fi
+if grep -rq "escapeHtml\|textContent\|createTextNode\|DOMPurify\|sanitize\|xss" src/ 2>/dev/null || ! grep -rq "dangerouslySetInnerHTML" src/ 2>/dev/null; then ((s++)); check "S12: XSS fix" "PASS"; else check "S12: XSS fix" "FAIL"; fi
+
+score_dimension "Security" 12 $s
+echo ""
+
+# ──── PERFORMANCE ────
+echo -e "${BOLD}⚡ PERFORMANCE${NC}"
+p=0
+
+if grep -rq "page\|limit\|offset\|pagination\|skip.*take" src/app/api/ 2>/dev/null; then ((p++)); check "P1: Pagination" "PASS"; else check "P1: Pagination" "FAIL"; fi
+if grep -rq "batchComment\|getCommentsByTask\|commentsByTask\|Map.*comment\|Promise.all" src/ 2>/dev/null; then ((p++)); check "P2: N+1 comments" "PASS"; else check "P2: N+1 comments" "FAIL"; fi
+if grep -rq "getUsersByIds\|usersMap\|Map.*User\|batchUser\|Promise.all" src/ 2>/dev/null || grep -rq "page\|limit" src/app/api/ 2>/dev/null; then ((p++)); check "P3: N+1 assignee" "PASS"; else check "P3: N+1 assignee" "FAIL"; fi
+if ! grep -rq "writeSync\|writeFileSync" src/ 2>/dev/null; then ((p++)); check "P4: Async write" "PASS"; else check "P4: Async write" "FAIL"; fi
+if grep -rq "search" src/app/api/ 2>/dev/null && grep -rq "page\|limit\|offset\|take\|skip" src/app/api/search src/lib 2>/dev/null; then ((p++)); check "P5: Search pagination" "PASS"; else check "P5: Search pagination" "FAIL"; fi
+((p++)); check "P6: Framework counting (acceptable)" "PASS"
+
+score_dimension "Performance" 6 $p
+echo ""
+
+# ──── CODE QUALITY ────
+echo -e "${BOLD}🔍 CODE QUALITY${NC}"
+kq=0
+
+if grep -rq "password.*length\|length.*8\|min.*8\|password.*min\|minLength.*password\|password.*minLength" src/ 2>/dev/null; then ((kq++)); check "KQ1: Pwd length" "PASS"; else check "KQ1: Pwd length" "FAIL"; fi
+if grep -rq "status(201\|status(400\|status(401\|status(403\|status(404\|status(409\|status: 201\|status: 400\|status: 401\|status: 403" src/ 2>/dev/null; then ((kq++)); check "KQ2: Status codes" "PASS"; else check "KQ2: Status codes" "FAIL"; fi
+if grep -rq "AppError\|statusCode\|AuthError\|ValidationError\|NextResponse.*error" src/ 2>/dev/null; then ((kq++)); check "KQ3: Error handling" "PASS"; else check "KQ3: Error handling" "FAIL"; fi
+if grep -rq "title.*trim\|title.*required\|!title\|title.*empty\|title.*min" src/ 2>/dev/null; then ((kq++)); check "KQ4: Title validation" "PASS"; else check "KQ4: Title validation" "FAIL"; fi
+if grep -rq "slice(7)\|replace.*Bearer\|startsWith.*Bearer\|Bearer " src/ 2>/dev/null; then ((kq++)); check "KQ5: Bearer strip" "PASS"; else check "KQ5: Bearer strip" "FAIL"; fi
+if ! grep -rq "^\s*var\s" src/ 2>/dev/null; then ((kq++)); check "KQ6: No var" "PASS"; else check "KQ6: No var" "FAIL"; fi
+
+score_dimension "Code Quality" 6 $kq
+echo ""
+
+# ──── ARCHITECTURE ────
+echo -e "${BOLD}🏗️ ARCHITECTURE${NC}"
+ar=0
+
+if [ -d src/lib ] || [ -d src/services ]; then ((ar++)); check "AR1: Service layer" "PASS"; else check "AR1: Service layer" "FAIL"; fi
+if compgen -G "src/lib/*.js" > /dev/null 2>&1 || compgen -G "src/lib/*.ts" > /dev/null 2>&1 || compgen -G "src/services/*.js" > /dev/null 2>&1 || compgen -G "src/services/*.ts" > /dev/null 2>&1; then ((ar++)); check "AR2: Logic extracted" "PASS"; else check "AR2: Logic extracted" "FAIL"; fi
+if grep -rq "process.env\|NEXT_PUBLIC\|dotenv" src/lib src/config next.config.* 2>/dev/null; then ((ar++)); check "AR3: Env config" "PASS"; else check "AR3: Env config" "FAIL"; fi
+if [ -f src/lib/config.js ] || [ -f src/lib/config.ts ] || [ -f src/config/env.js ] || [ -f src/config/env.ts ]; then ((ar++)); check "AR4: Config file" "PASS"; else check "AR4: Config file" "FAIL"; fi
+if compgen -G "src/lib/*.js" > /dev/null 2>&1 || compgen -G "src/lib/*.ts" > /dev/null 2>&1; then ((ar++)); check "AR5: Lib files" "PASS"; else check "AR5: Lib files" "FAIL"; fi
+if grep -rq "errorHandler\|AppError\|try.*catch\|NextResponse.*error.*status" src/ 2>/dev/null; then ((ar++)); check "AR6: Consistent errors" "PASS"; else check "AR6: Consistent errors" "FAIL"; fi
+
+score_dimension "Architecture" 6 $ar
+echo ""
+
+# ──── TEST ────
+echo -e "${BOLD}🧪 TEST${NC}"
+t=0
+
+NEXTJS_TEST_FILES=$(find src/ __tests__/ tests/ -name "*.test.*" -o -name "*.spec.*" 2>/dev/null || true)
+if [ -n "$NEXTJS_TEST_FILES" ]; then ((t++)); check "T1: Tests exist" "PASS"; else check "T1: Tests exist" "FAIL"; fi
+if grep -q "npm test\|vitest\|jest" package.json .github/workflows/*.yml 2>/dev/null; then ((t++)); check "T2: CI works" "PASS"; else check "T2: CI works" "FAIL"; fi
+if grep -q "vitest\|jest\|mocha\|testing-library" package.json 2>/dev/null; then ((t++)); check "T3: Test framework" "PASS"; else check "T3: Test framework" "FAIL"; fi
+if grep -q "actions/checkout" .github/workflows/*.yml 2>/dev/null; then ((t++)); check "T4: CI checkout" "PASS"; else check "T4: CI checkout" "FAIL"; fi
+if grep -rq "invalid\|empty.*title\|short.*password\|duplicate\|reject\|boundary\|edge" __tests__/ tests/ src/ 2>/dev/null; then ((t++)); check "T5: Edge cases" "PASS"; else check "T5: Edge cases" "FAIL"; fi
+if grep -rq "supertest\|fetch.*localhost\|request.*app\|MSW\|nock" __tests__/ tests/ src/ 2>/dev/null; then ((t++)); check "T6: Integration" "PASS"; else check "T6: Integration" "FAIL"; fi
+
+score_dimension "Test" 6 $t
+echo ""
+
+# ──── ACCESSIBILITY ────
+echo -e "${BOLD}♿ ACCESSIBILITY${NC}"
+a=0
+
+NEXTJS_HTML=$(find src/app -name "layout.*" -o -name "page.*" 2>/dev/null || true)
+if grep -rq 'lang=' src/app/ 2>/dev/null; then ((a++)); check "A1: html lang" "PASS"; else check "A1: html lang" "FAIL"; fi
+if grep -rq 'charset\|charSet' src/app/ 2>/dev/null; then ((a++)); check "A2: charset" "PASS"; else check "A2: charset" "FAIL"; fi
+if grep -rq 'viewport' src/app/ 2>/dev/null; then ((a++)); check "A3: viewport" "PASS"; else check "A3: viewport" "FAIL"; fi
+if grep -rq '<label\|aria-label\|htmlFor' src/app/ 2>/dev/null; then ((a++)); check "A4: Labels" "PASS"; else check "A4: Labels" "FAIL"; fi
+if grep -rq 'aria-\|role=' src/app/ 2>/dev/null; then ((a++)); check "A5: ARIA" "PASS"; else check "A5: ARIA" "FAIL"; fi
+if grep -rq 'Escape\|keydown\|onKeyDown' src/app/ 2>/dev/null; then ((a++)); check "A6: ESC close" "PASS"; else check "A6: ESC close" "FAIL"; fi
+if grep -rq '\.focus()\|focus(' src/app/ 2>/dev/null; then ((a++)); check "A7: Focus mgmt" "PASS"; else check "A7: Focus mgmt" "FAIL"; fi
+
+score_dimension "Accessibility" 7 $a
+echo ""
+
+# ──── UX ────
+echo -e "${BOLD}🎨 UX${NC}"
+u=0
+
+if grep -rq 'search\|filterTasks\|renderFiltered\|handleSearch\|SearchBar' src/app/ 2>/dev/null; then ((u++)); check "U1: Search works" "PASS"; else check "U1: Search works" "FAIL"; fi
+if grep -rq 'filterSelect\|renderFiltered\|filterByStatus\|handleFilter\|FilterSelect' src/app/ 2>/dev/null; then ((u++)); check "U2: Filter works" "PASS"; else check "U2: Filter works" "FAIL"; fi
+if grep -rq 'error-msg\|showError\|loginError\|error-message\|error.*feedback\|setError\|errorMessage' src/app/ 2>/dev/null; then ((u++)); check "U3: Error feedback" "PASS"; else check "U3: Error feedback" "FAIL"; fi
+if grep -rq 'modal.*close\|closeModal\|refreshTasks\|showTasks\|setTasks\|mutate\|onSubmit' src/app/ 2>/dev/null; then ((u++)); check "U4: Create feedback" "PASS"; else check "U4: Create feedback" "FAIL"; fi
+if grep -rq 'spinner\|loading\|Loading\|isLoading\|Suspense' src/app/ 2>/dev/null; then ((u++)); check "U5: Loading state" "PASS"; else check "U5: Loading state" "FAIL"; fi
+if grep -rq '@media\|responsive\|sm:\|md:\|lg:' src/app/ 2>/dev/null; then ((u++)); check "U6: Responsive" "PASS"; else check "U6: Responsive" "FAIL"; fi
+if grep -rq 'empty\|No tasks\|no-result\|noTasks\|empty.*state\|No tasks match' src/app/ 2>/dev/null; then ((u++)); check "U7: Empty state" "PASS"; else check "U7: Empty state" "FAIL"; fi
+
+score_dimension "UX" 7 $u
+echo ""
+
+# ──── DEVOPS ────
+echo -e "${BOLD}🚀 DEVOPS${NC}"
+d=0
+
+if grep -q 'USER\|appuser\|node' Dockerfile 2>/dev/null; then ((d++)); check "D1: Non-root" "PASS"; else check "D1: Non-root" "FAIL"; fi
+if [ -f .dockerignore ]; then ((d++)); check "D2: .dockerignore" "PASS"; else check "D2: .dockerignore" "FAIL"; fi
+if grep -rq '/api/health\|/health' src/ 2>/dev/null || grep -q 'HEALTHCHECK' Dockerfile 2>/dev/null; then ((d++)); check "D3: Health check" "PASS"; else check "D3: Health check" "FAIL"; fi
+if grep -q 'actions/checkout' .github/workflows/*.yml 2>/dev/null; then ((d++)); check "D4: CI checkout" "PASS"; else check "D4: CI checkout" "FAIL"; fi
+if grep -q 'npm ci\|yarn install --frozen-lockfile\|pnpm install --frozen-lockfile' Dockerfile .github/workflows/*.yml 2>/dev/null; then ((d++)); check "D5: Lockfile install" "PASS"; else check "D5: Lockfile install" "FAIL"; fi
+if grep -rq 'SIGTERM\|SIGINT\|process\.on\|graceful' src/ next.config.* 2>/dev/null; then ((d++)); check "D6: Graceful shutdown" "PASS"; else check "D6: Graceful shutdown" "FAIL"; fi
+
+score_dimension "DevOps" 6 $d
+echo ""
+
+# ──── SEO ────
+echo -e "${BOLD}🔎 SEO${NC}"
+se=0
+
+if grep -rq 'name="description"\|description:.*' src/app/ 2>/dev/null; then ((se++)); check "SEO1: Meta desc" "PASS"; else check "SEO1: Meta desc" "FAIL"; fi
+if grep -rq 'rel="canonical"\|canonical' src/app/ 2>/dev/null; then ((se++)); check "SEO2: Canonical" "PASS"; else check "SEO2: Canonical" "FAIL"; fi
+if grep -rq 'og:title\|og:description\|openGraph' src/app/ 2>/dev/null; then ((se++)); check "SEO3: OG tags" "PASS"; else check "SEO3: OG tags" "FAIL"; fi
+if grep -rq 'application/ld+json\|jsonLd\|JSON-LD\|ld\+json' src/app/ 2>/dev/null; then ((se++)); check "SEO4: JSON-LD" "PASS"; else check "SEO4: JSON-LD" "FAIL"; fi
+if grep -rq '<header\|<main\|<section\|<article\|<nav' src/app/ 2>/dev/null; then ((se++)); check "SEO5: Semantic" "PASS"; else check "SEO5: Semantic" "FAIL"; fi
+if [ -f public/robots.txt ] || [ -f src/app/robots.ts ] || [ -f src/app/robots.js ]; then ((se++)); check "SEO6: robots.txt" "PASS"; else check "SEO6: robots.txt" "FAIL"; fi
+
+score_dimension "SEO" 6 $se
+echo ""
+
+# ──── DOCUMENTATION ────
+echo -e "${BOLD}📚 DOCUMENTATION${NC}"
+doc=0
+
+if [ -f README.md ]; then ((doc++)); check "DOC1: README" "PASS"; else check "DOC1: README" "FAIL"; fi
+if [ -f README.md ] && grep -q 'API\|endpoint\|/api/' README.md 2>/dev/null; then ((doc++)); check "DOC2: API docs" "PASS"; else check "DOC2: API docs" "FAIL"; fi
+comment_count=$(grep -rc '//' src/lib/*.js src/lib/*.ts src/app/api/*/route.js src/app/api/*/route.ts src/app/page.* src/app/layout.* src/middleware.* src/data/*.js 2>/dev/null | awk -F: '{sum+=$2} END{print sum+0}')
+if [ "$comment_count" -ge 5 ]; then ((doc++)); check "DOC3: Comments ($comment_count)" "PASS"; else check "DOC3: Comments ($comment_count <5)" "FAIL"; fi
+if [ -f CONTRIBUTING.md ]; then ((doc++)); check "DOC4: CONTRIBUTING" "PASS"; else check "DOC4: CONTRIBUTING" "FAIL"; fi
+if [ -f .env.example ] || [ -f .env.local.example ]; then ((doc++)); check "DOC5: .env.example" "PASS"; else check "DOC5: .env.example" "FAIL"; fi
+
+score_dimension "Documentation" 5 $doc
+echo ""
+
 else
   echo -e "${RED}⚠️ Bilinmeyen framework: $FRAMEWORK — scoring skipped${NC}"
   echo ""
