@@ -2,6 +2,35 @@
 
 **10-dimension automated code audit kit** for OpenCode AI. Works **inside OpenCode** — score results appear as markdown in your chat.
 
+## 📦 Kurulum
+
+### Yöntem 1: OpenCode Plugin (Önerilen)
+```bash
+npx opencode-ai plugin /path/to/opencode-audit-kit
+# VEYA global:
+npx opencode-ai plugin /path/to/opencode-audit-kit --global
+```
+
+### Yöntem 2: npm install (Tarball)
+```bash
+# Tarball'dan kurulum (npm publish gerektirmez)
+npm install ./dejavuxer-opencode-audit-kit-2.0.0.tgz
+npx opencode-audit --help
+```
+
+### Yöntem 3: GitHub'dan kurulum
+```bash
+npm install git+https://github.com/dejavuxer/opencode-audit-kit.git
+npx opencode-audit --help
+```
+
+### Yöntem 4: Manuel kopyalama
+```bash
+git clone https://github.com/dejavuxer/opencode-audit-kit.git
+cd opencode-audit-kit
+bash install-project.sh /senin/projen
+```
+
 ## 🚀 OpenCode İçinde Kullanım
 
 ```bash
@@ -74,6 +103,21 @@ opencode-audit-kit/
 ├── cli.js                 # CLI entry point
 ├── package.json           # npm package (v2.0.0)
 └── README.md
+```
+
+## 🤖 Model Desteği
+
+| Model | Model ID | Ücret | Durum |
+|-------|----------|:-----:|:-----:|
+| DeepSeek V4 Flash | `opencode/deepseek-v4-flash-free` | Ücretsiz | ✅ Varsayılan |
+| MiMo V2.5 | `opencode/mimo-v2.5-free` | Ücretsiz | ✅ |
+| Qwen 3.7 Plus | (varsayılan) | Ücretsiz | ✅ |
+
+Auto-audit varsayılan olarak **DeepSeek V4 Flash** kullanır.
+
+```bash
+# Özel model ile çalıştır
+npx opencode-ai run "10 boyut audit yap" --model "opencode/deepseek-v4-flash-free"
 ```
 
 ## 📈 Test Results
