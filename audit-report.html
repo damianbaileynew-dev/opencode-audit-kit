@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audit Report — opencode-audit-kit</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+.container{max-width:1200px;margin:0 auto;padding:24px}
+header{text-align:center;margin-bottom:32px}
+header h1{font-size:2rem;background:linear-gradient(135deg,#38bdf8,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+header .meta{color:#94a3b8;margin-top:8px;font-size:0.9rem}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin-bottom:24px}
+.summary-card{background:#1e293b;border-radius:12px;padding:20px;text-align:center;border:1px solid #334155}
+.summary-card .label{font-size:0.75rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em}
+.summary-card .value{font-size:2rem;font-weight:700;margin-top:4px}
+.summary-card .value.pass{color:#4ade80} .summary-card .value.fail{color:#f87171} .summary-card .value.info{color:#38bdf8}
+.result-banner{padding:16px 24px;border-radius:12px;text-align:center;font-size:1.1rem;font-weight:700;margin-bottom:24px}
+.result-banner.pass{background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.3);color:#4ade80}
+.result-banner.fail{background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);color:#f87171}
+.dimensions-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-bottom:24px}
+.dim-card{background:#1e293b;border-radius:12px;padding:20px;border:1px solid #334155}
+.dim-card .dim-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.dim-card .dim-name{font-weight:600;font-size:1rem}
+.dim-card .dim-score{font-weight:700;font-size:1.1rem}
+.dim-card .dim-score.pass{color:#4ade80} .dim-card .dim-score.fail{color:#f87171}
+.progress-bar{width:100%;height:8px;background:#334155;border-radius:4px;overflow:hidden;margin-bottom:12px}
+.progress-bar .fill{height:100%;border-radius:4px;transition:width 0.5s ease}
+.progress-bar .fill.pass{background:linear-gradient(90deg,#4ade80,#22c55e)}
+.progress-bar .fill.fail{background:linear-gradient(90deg,#f87171,#ef4444)}
+.badge{display:inline-block;padding:3px 10px;border-radius:9999px;font-size:0.75rem;font-weight:600;margin-bottom:8px}
+.badge-pass{background:rgba(74,222,128,0.15);color:#4ade80} .badge-fail{background:rgba(248,113,113,0.15);color:#f87171}
+.check-list{list-style:none;margin-top:8px} .check-list li{padding:3px 0;font-size:0.82rem;display:flex;align-items:center;gap:6px;color:#cbd5e1}
+.check-list li .icon{font-size:0.85rem;flex-shrink:0} .check-list li.pass .icon{color:#4ade80} .check-list li.fail .icon{color:#f87171}
+.check-list li.fail span:last-child{color:#f87171}
+footer{text-align:center;padding:24px;color:#64748b;font-size:0.85rem}
+@media(max-width:768px){.container{padding:16px} .dimensions-grid{grid-template-columns:1fr} .summary-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🔍 Audit Report</h1>
+    <div class="meta">opencode-audit-kit &bull; [1mjs-express[0m &bull; 2026-06-13 15:07:39</div>
+  </header>
+
+  <div class="summary-grid">
+    <div class="summary-card"><div class="label">Overall</div><div class="value fail">10%</div></div>
+    <div class="summary-card"><div class="label">Checks</div><div class="value info">7/67</div></div>
+    <div class="summary-card"><div class="label">Dimensions</div><div class="value fail">0/10</div></div>
+    <div class="summary-card"><div class="label">Framework</div><div class="value info" style="font-size:1.2rem">[1mjs-express[0m</div></div>
+  </div>
+  <div class="result-banner fail">❌ 0/10 boyut geçti — 10 boyut KALDI</div>
+  <div class="dimensions-grid">
+    <div class="dim-card">
+      <div class="dim-header">
+        <span class="dim-name">🔒 Security</span>
+        <span class="dim-score fail">0/12 — 0%</span>
+      </div>
+      <div class="progress-bar"><div class="fill fail" style="width:0%"></div></div>
+      <span class="badge badge-fail">❌ FAIL</span>
+      <ul class="check-list">      </ul>
+    </div>
+    <div class="dim-card">
+      <div class="dim-header">
+        <span class="dim-name">⚡ Performance</span>
+        <span class="dim-score fail">2/6 — 33%</span>
+      </div>
+      <div class="progress-bar"><div class="fill fail" style="width:33%"></div></div>
+      <span class="badge badge-fail">❌ FAIL</span>
+      <ul class="check-list">      </ul>
+    </div>
+    <div class="dim-card">
+      <div class="dim-header">
+        <span class="dim-name">🔍 Code Quality</span>
+        <span class="dim-score fail">1/6 — 16%</span>
+      </div>
+      <div class="progress-bar"><div class="fill fail" style="width:16%"></div></div>
+      <span class="badge badge-fail">❌ FAIL</span>
+      <ul class="check-list">      </ul>
+    </div>
+    <div class="dim-card">
+      <div class="dim-header">
+        <span class="dim-name">🏗️ Architecture</span>
+        <span class="dim-score fail">0/6 — 0%</span>
+      </div>
+      <div class="progress-bar"><div class="fill fail" style="width:0%"></div></div>
+      <span class="badge badge-fail">❌ FAIL</span>
+      <ul class="check-list">      </ul>
+    </div>
+    <div class="dim-card">
+      <div class="dim-header">
+        <span class="dim-name">🧪 Test</span>
+        <span class="dim-score fail">1/6 — 16%</span>
+      </div>
+      <div class="progress-bar"><div class="fill fail" style="width:16%"></div></div>
+      <span class="badge badge-fail">❌ FAIL</span>
+      <ul class="check-list">      </ul>
+    </div>
+    <div class="dim-card">
+      <div class="dim-header">
+        <span class="dim-name">♿ Accessibility</span>
+        <span class="dim-score fail">0/7 — 0%</span>
+      </div>
+      <div class="progress-bar"><div class="fill fail" style="width:0%"></div></div>
+      <span class="badge badge-fail">❌ FAIL</span>
+      <ul class="check-list">      </ul>
+    </div>
+    <div class="dim-card">
+      <div class="dim-header">
+        <span class="dim-name">🎨 UX</span>
+        <span class="dim-score fail">0/7 — 0%</span>
+      </div>
+      <div class="progress-bar"><div class="fill fail" style="width:0%"></div></div>
+      <span class="badge badge-fail">❌ FAIL</span>
+      <ul class="check-list"><li class="fail"><span class="icon">❌</span><span>[0m U1: Search works</span></li>
+<li class="fail"><span class="icon">❌</span><span>[0m U2: Filter works</span></li>
+<li class="fail"><span class="icon">❌</span><span>[0m U3: Error feedback</span></li>
+<li class="fail"><span class="icon">❌</span><span>[0m U4: Create feedback</span></li>
+<li class="fail"><span class="icon">❌</span><span>[0m U5: Loading state</span></li>
+<li class="fail"><span class="icon">❌</span><span>[0m U6: Responsive</span></li>
+<li class="fail"><span class="icon">❌</span><span>[0m U7: Empty state</span></li>
+<li class="fail"><span class="icon">❌</span><span>FAIL[0m</span></li>
+<li class="fail"><span class="icon">❌</span><span>[0m D1: Non-root</span></li>
+<li class="fail"><span class="icon">❌</span><span>[0m D2: .dockerignore</span></li>
+<li class="fail"><span class="icon">❌</span><span>[0m D3: Health check</span></li>
+<li class="pass"><span class="icon">✅</span><span>[0m D4: CI checkout</span></li>
+<li class="fail"><span class="icon">❌</span><span>[0m D5: npm ci</span></li>
+<li class="fail"><span class="icon">❌</span><span>[0m D6: Graceful shutdown</span></li>
+<li class="fail"><span class="icon">❌</span><span>FAIL[0m</span></li>
+      </ul>
+    </div>
+    <div class="dim-card">
+      <div class="dim-header">
+        <span class="dim-name">🚀 DevOps</span>
+        <span class="dim-score fail">1/6 — 16%</span>
+      </div>
+      <div class="progress-bar"><div class="fill fail" style="width:16%"></div></div>
+      <span class="badge badge-fail">❌ FAIL</span>
+      <ul class="check-list">      </ul>
+    </div>
+    <div class="dim-card">
+      <div class="dim-header">
+        <span class="dim-name">🔎 SEO</span>
+        <span class="dim-score fail">0/6 — 0%</span>
+      </div>
+      <div class="progress-bar"><div class="fill fail" style="width:0%"></div></div>
+      <span class="badge badge-fail">❌ FAIL</span>
+      <ul class="check-list"><li class="fail"><span class="icon">❌</span><span>[0m SEO1: Meta desc</span></li>
+<li class="fail"><span class="icon">❌</span><span>[0m SEO2: Canonical</span></li>
+<li class="fail"><span class="icon">❌</span><span>[0m SEO3: OG tags</span></li>
+<li class="fail"><span class="icon">❌</span><span>[0m SEO4: JSON-LD</span></li>
+<li class="fail"><span class="icon">❌</span><span>[0m SEO5: Semantic</span></li>
+<li class="fail"><span class="icon">❌</span><span>[0m SEO6: robots.txt</span></li>
+<li class="fail"><span class="icon">❌</span><span>FAIL[0m</span></li>
+<li class="pass"><span class="icon">✅</span><span>[0m DOC1: README</span></li>
+<li class="pass"><span class="icon">✅</span><span>[0m DOC2: API docs</span></li>
+<li class="fail"><span class="icon">❌</span><span>[0m DOC3: Comments (0 <5)</span></li>
+<li class="fail"><span class="icon">❌</span><span>[0m DOC4: CONTRIBUTING</span></li>
+<li class="fail"><span class="icon">❌</span><span>[0m DOC5: .env.example</span></li>
+<li class="fail"><span class="icon">❌</span><span>FAIL[0m</span></li>
+<li class="fail"><span class="icon">❌</span><span>FAIL[0m</span></li>
+<li class="fail"><span class="icon">❌</span><span>FAIL[0m</span></li>
+<li class="fail"><span class="icon">❌</span><span>FAIL[0m</span></li>
+<li class="fail"><span class="icon">❌</span><span>FAIL[0m</span></li>
+<li class="fail"><span class="icon">❌</span><span>FAIL[0m</span></li>
+<li class="fail"><span class="icon">❌</span><span>FAIL[0m</span></li>
+<li class="fail"><span class="icon">❌</span><span>FAIL[0m</span></li>
+<li class="fail"><span class="icon">❌</span><span>FAIL[0m</span></li>
+<li class="fail"><span class="icon">❌</span><span>FAIL[0m</span></li>
+<li class="fail"><span class="icon">❌</span><span>FAIL[0m</span></li>
+<li class="fail"><span class="icon">❌</span><span>0/10 boyut geçti — [0;31m10 boyut KALDI[0m</span></li>
+      </ul>
+    </div>
+    <div class="dim-card">
+      <div class="dim-header">
+        <span class="dim-name">📚 Documentation</span>
+        <span class="dim-score fail">2/5 — 40%</span>
+      </div>
+      <div class="progress-bar"><div class="fill fail" style="width:40%"></div></div>
+      <span class="badge badge-fail">❌ FAIL</span>
+      <ul class="check-list">      </ul>
+    </div>
+  </div>
+  <footer>
+    <p>OpenCode Audit Kit v2.0 — Generated by <code>opencode-audit score . --html</code></p>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,72 @@
+{
+  "name": "@dejavuxer/opencode-audit-kit",
+  "version": "2.0.0",
+  "description": "10-dimension automated code audit kit for OpenCode AI \u2014 Security, Performance, Code Quality, Architecture, Test, Accessibility, UX, DevOps, SEO, Documentation. Supports Express.js, TypeScript/Express, FastAPI, and NestJS.",
+  "main": "index.js",
+  "bin": {
+    "opencode-audit": "./cli.js",
+    "opencode-audit-score": "./score.sh",
+    "opencode-audit-validate": "./validate.sh"
+  },
+  "scripts": {
+    "validate": "bash validate.sh",
+    "score": "bash score.sh",
+    "auto-audit": "bash auto-audit.sh",
+    "install:project": "bash install-project.sh",
+    "install:global": "bash install-global.sh",
+    "uninstall": "bash uninstall.sh",
+    "prepublishOnly": "bash validate.sh"
+  },
+  "keywords": [
+    "audit",
+    "code-review",
+    "security",
+    "performance",
+    "accessibility",
+    "opencode",
+    "ai",
+    "code-quality",
+    "devops",
+    "seo",
+    "documentation",
+    "testing",
+    "nestjs",
+    "fastapi",
+    "express",
+    "typescript",
+    "python",
+    "lint",
+    "code-audit",
+    "automated-review"
+  ],
+  "author": "OpenCode Audit Kit Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/opencode-audit-kit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/opencode-audit-kit/issues"
+  },
+  "homepage": "https://github.com/your-org/opencode-audit-kit#readme",
+  "dependencies": {
+    "@opencode-ai/plugin": "^1.17.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "global/",
+    "scripts/",
+    "validate.sh",
+    "score.sh",
+    "auto-audit.sh",
+    "install-project.sh",
+    "install-global.sh",
+    "uninstall.sh",
+    "cli.js",
+    "index.js",
+    "README.md",
+    "LICENSE"
+  ]
+}

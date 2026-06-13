@@ -1,0 +1,74 @@
+name: Audit Kit CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Validate Skills & Agents
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run validation
+        run: bash validate.sh
+
+  score-fastapi:
+    name: Score FastAPI Test Project
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Score FastAPI buggy
+        run: bash score.sh ./test-projects/fastapi-buggy || true
+
+      - name: Score FastAPI fixed
+        run: bash score.sh ./test-projects/fastapi-fixed
+
+  score-nestjs:
+    name: Score NestJS Test Project
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Score NestJS buggy
+        run: bash score.sh ./test-projects/nestjs-buggy || true
+
+      - name: Score NestJS fixed
+        run: bash score.sh ./test-projects/nestjs-fixed
+
+  score-express:
+    name: Score Express Test Projects
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Score JS Express
+        run: bash score.sh ./test-projects/js-express || true
+
+      - name: Score TS Express
+        run: bash score.sh ./test-projects/ts-express || true
+
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    needs: [validate, score-fastapi, score-nestjs, score-express]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

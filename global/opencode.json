@@ -1,0 +1,101 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "bash": "allow",
+    "edit": "allow",
+    "write": "allow",
+    "read": "allow",
+    "grep": "allow",
+    "glob": "allow",
+    "lsp": "allow",
+    "websearch": "allow",
+    "webfetch": "allow",
+    "question": "allow",
+    "todowrite": "allow",
+    "todoread": "allow",
+    "playwright_*": "allow",
+    "codegraph_*": "allow"
+  },
+  "tools": {
+    "lsp": true,
+    "websearch": true
+  },
+  "mcp": {
+    "playwright": {
+      "type": "local",
+      "command": [
+        "npx",
+        "@playwright/mcp@latest",
+        "--headless"
+      ],
+      "enabled": true
+    },
+    "context7": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@upstash/context7-mcp"
+      ],
+      "enabled": true
+    },
+    "codegraph": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@colbymchenry/codegraph",
+        "serve",
+        "--mcp"
+      ],
+      "enabled": true
+    },
+    "memory": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "enabled": true
+    },
+    "cavemem": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "cavemem",
+        "mcp"
+      ],
+      "enabled": true
+    },
+    "local-memory": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@studiomeyer/local-memory-mcp"
+      ],
+      "enabled": true
+    },
+    "hivemind": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "hivemind-mcp",
+        "start"
+      ],
+      "enabled": true
+    },
+    "code-review-graph": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "code-review-graph",
+        "serve"
+      ],
+      "enabled": true
+    }
+  }
+}

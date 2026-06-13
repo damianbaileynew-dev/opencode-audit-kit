@@ -1,0 +1,8 @@
+node_modules/
+.arena/
+.cache/
+.npm/
+*.log
+.DS_Store
+.env
+opencode-audit-kit-*.tgz
