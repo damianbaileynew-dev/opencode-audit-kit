@@ -59,6 +59,41 @@ Bu en yüksek token tüketen ama KESİNLİKLE çalışan yöntemdir.
 
 **Hangi stratejinin çalıştığını test et:** İlk adımda @mention dene, çalışmazsa skill dene, o da çalışmazsa kendin yap.
 
+## 🔗 Addy Osmani agent-skills Entegrasyonu
+
+Bu sistem **2 plugin** ile çalışır:
+1. **opencode-audit-kit** (bizim) — Audit, fix, scoring, 5 framework desteği
+2. **addyosmani/agent-skills** — Process-oriented engineering skills (STRIDE, TDD, code review, performance optimization)
+
+### Öncelik Mekanizması (Skill Çakışması Yok)
+
+İki plugin'in skill'leri **farklı isim uzaylarında** — çakışma yok:
+
+| Senaryo | Audit Kit Skill | Addy Osmani Skill | Öncelik |
+|---------|----------------|-------------------|---------|
+| Güvenlik audit | `security-audit-full` | `security-and-hardening` | **Audit Kit** (otomatik scoring), Addy (STRIDE thought model) |
+| Performans audit | `performance-audit` | `performance-optimization` | **Audit Kit** (Core Web Vitals scoring), Addy (Measure→Fix→Guard) |
+| Kod review | `code-review` | `code-review-and-quality` | **Audit Kit** (10 boyut scoring), Addy (5-eksen review, change sizing) |
+| Test | `fix-test`, `tdd` | `test-driven-development` | **Audit Kit** (supertest integration), Addy (Prove-It Pattern) |
+| Dokümantasyon | `fix-docs` | `documentation-and-adrs` | **Audit Kit** (5 zorunlu dosya), Addy (ADR Template) |
+
+**Kural:** Audit/fix işlemlerinde **Audit Kit önceliklidir** (otomatik scoring). Addy Osmani skill'leri ** düşünme kalitesini artırmak** için kullanılır — STRIDE threat model, Prove-It pattern, Common Rationalizations gibi.
+
+### Ne Zaman Addy Osmani Skill'leri Kullanılır?
+
+| Addy Skill | Ne Zaman Kullanılır |
+|------------|---------------------|
+| `security-and-hardening` | STRIDE threat modeling yapılması gerektiğinde |
+| `performance-optimization` | Measure→Identify→Fix→Verify→Guard workflow gerektiğinde |
+| `test-driven-development` | Prove-It Pattern ile bug fix yapılması gerektiğinde |
+| `code-review-and-quality` | 5-eksen review + change sizing gerektiğinde |
+| `documentation-and-adrs` | ADR yazılması gerektiğinde |
+| `doubt-driven-development` | Kritik kararlarda adversarial review gerektiğinde |
+| `source-driven-development` | Framework resmi dokümanına göre fix yapılması gerektiğinde |
+| `context-engineering` | Agent context kalitesi düştüğünde |
+| `incremental-implementation` | Büyük feature implementasyonu gerektiğinde |
+| `spec-driven-development` | Yeni proje/feature tanımı yapılması gerektiğinde |
+
 ---
 
 ## Sıra (Değiştirme, sırayla git)

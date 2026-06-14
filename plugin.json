@@ -1,0 +1,12 @@
+{
+  "name": "opencode-audit-kit",
+  "description": "10-dimensional code audit kit with auto-scoring, auto-fix, and 5-framework support (Express.js, TypeScript/Express, FastAPI, NestJS, Next.js)",
+  "author": {
+    "name": "dejavuxer"
+  },
+  "homepage": "https://github.com/damianbaileynew-dev/opencode-audit-kit",
+  "repository": "https://github.com/damianbaileynew-dev/opencode-audit-kit",
+  "license": "MIT",
+  "skills": "./global/skills",
+  "agents": "./global/agents"
+}
