@@ -426,9 +426,11 @@ for skill_dir in "$SCRIPT_DIR/global/skills/"*/; do
         check "$skill_name → frontmatter EKSİK!" "fail"
     fi
     
-    # Check content length (should be substantial)
+    # Check content length (should be substantial but < 500 lines per skill anatomy spec)
     LINES=$(wc -l < "$skill_file")
-    if [ "$LINES" -gt 20 ]; then
+    if [ "$LINES" -gt 500 ]; then
+        check "$skill_name → $LINES satır (500+ — reference dosyasına taşı!)" "warn"
+    elif [ "$LINES" -gt 20 ]; then
         check "$skill_name → $LINES satır içerik" "pass"
     else
         check "$skill_name → $LINES satır (20+ bekleniyor)" "warn"
@@ -439,6 +441,31 @@ for skill_dir in "$SCRIPT_DIR/global/skills/"*/; do
         check "$skill_name → name tanımlı" "pass"
     else
         check "$skill_name → name EKSİK!" "fail"
+    fi
+    
+    # Check for description in frontmatter (Addy Osmani skill anatomy spec)
+    if grep -q "^description:" "$skill_file"; then
+        # Check description length ≤ 1024 chars
+        desc_len=$(awk '/^---$/{n++; next} n==1 && /^description:/{gsub(/^description: */, ""); s=$0; while(getline > 0){if(/^[^ ]/ || /^---/) break; s=s" "$0} print length(s); exit}' "$skill_file")
+        if [ -n "$desc_len" ] && [ "$desc_len" -le 1024 ]; then
+            check "$skill_name → description tanımlı ($desc_len char)" "pass"
+        elif [ -n "$desc_len" ]; then
+            check "$skill_name → description $desc_len char (>1024 — kısalt!)" "warn"
+        else
+            check "$skill_name → description tanımlı" "pass"
+        fi
+    else
+        check "$skill_name → description EKSİK!" "fail"
+    fi
+    
+    # Check for Common Rationalizations section (Addy Osmani standard)
+    if grep -q "## Common Rationalizations" "$skill_file"; then
+        check "$skill_name → Common Rationalizations bölümü" "pass"
+    fi
+    
+    # Check for Red Flags section (Addy Osmani standard)
+    if grep -q "## Red Flags" "$skill_file"; then
+        check "$skill_name → Red Flags bölümü" "pass"
     fi
 done
 

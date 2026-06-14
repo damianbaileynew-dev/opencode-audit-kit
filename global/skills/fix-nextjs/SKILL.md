@@ -1,5 +1,11 @@
 ---
 name: fix-nextjs
+description: >-
+  Next.js App Router fix skill. 10 boyutlu audit sorunlarını düzeltir: security (middleware, headers, sanitization),
+  performance (pagination, search), code quality (password min, validation), architecture (service layer, config),
+  test (integration), accessibility (ARIA, labels), UX (loading, responsive, search), DevOps (health, Docker),
+  SEO (metadata, JSON-LD, robots.txt), documentation (README, API, inline comments).
+  Trigger: "fix nextjs", "nextjs fix", "düzelt nextjs", "onar nextjs"
 mode: subagent
 model: opencode/deepseek-v4-flash-free
 permission:
