@@ -1011,7 +1011,7 @@ echo ""
 echo -e "${BOLD}🧪 TEST${NC}"
 t=0
 
-NEXTJS_TEST_FILES=$(find src/ __tests__/ tests/ -name "*.test.*" -o -name "*.spec.*" 2>/dev/null || true)
+NEXTJS_TEST_FILES=$(find src/ __tests__/ tests/ app/ -name "*.test.*" -o -name "*.spec.*" 2>/dev/null || true)
 if [ -n "$NEXTJS_TEST_FILES" ]; then ((t++)); check "T1: Tests exist" "PASS"; else check "T1: Tests exist" "FAIL"; fi
 if grep -q "npm test\|vitest\|jest" package.json .github/workflows/*.yml 2>/dev/null; then ((t++)); check "T2: CI works" "PASS"; else check "T2: CI works" "FAIL"; fi
 if grep -q "vitest\|jest\|mocha\|testing-library" package.json 2>/dev/null; then ((t++)); check "T3: Test framework" "PASS"; else check "T3: Test framework" "FAIL"; fi
@@ -1028,8 +1028,8 @@ a=0
 
 NEXTJS_HTML=$(find src/app -name "layout.*" -o -name "page.*" 2>/dev/null || true)
 if grep -rq 'lang=' src/app/ app/ 2>/dev/null; then ((a++)); check "A1: html lang" "PASS"; else check "A1: html lang" "FAIL"; fi
-if grep -rq 'charset\|charSet' src/app/ app/ 2>/dev/null; then ((a++)); check "A2: charset" "PASS"; else check "A2: charset" "FAIL"; fi
-if grep -rq 'viewport' src/app/ app/ 2>/dev/null; then ((a++)); check "A3: viewport" "PASS"; else check "A3: viewport" "FAIL"; fi
+if grep -rq 'charset\|charSet' src/app/ app/ components/ 2>/dev/null; then ((a++)); check "A2: charset" "PASS"; else check "A2: charset" "FAIL"; fi
+if grep -rq 'viewport\|metadata.*viewport\|Viewport' src/app/ app/ components/ 2>/dev/null; then ((a++)); check "A3: viewport" "PASS"; else check "A3: viewport" "FAIL"; fi
 if grep -rq '<label\|aria-label\|htmlFor' src/app/ app/ components/ 2>/dev/null; then ((a++)); check "A4: Labels" "PASS"; else check "A4: Labels" "FAIL"; fi
 if grep -rq 'aria-\|role=' src/app/ app/ components/ 2>/dev/null; then ((a++)); check "A5: ARIA" "PASS"; else check "A5: ARIA" "FAIL"; fi
 if grep -rq 'Escape\|keydown\|onKeyDown' src/app/ app/ components/ 2>/dev/null; then ((a++)); check "A6: ESC close" "PASS"; else check "A6: ESC close" "FAIL"; fi
@@ -1043,8 +1043,8 @@ echo -e "${BOLD}🎨 UX${NC}"
 u=0
 
 if grep -rq 'search\|filterTasks\|renderFiltered\|handleSearch\|SearchBar\|useSearchParams\|SearchInput' src/app/ app/ components/ 2>/dev/null; then ((u++)); check "U1: Search works" "PASS"; else check "U1: Search works" "FAIL"; fi
-if grep -rq 'filterSelect\|renderFiltered\|filterByStatus\|handleFilter\|FilterSelect\|applyFilter\|useFilter\|filterState' src/app/ app/ components/ 2>/dev/null; then ((u++)); check "U2: Filter works" "PASS"; else check "U2: Filter works" "FAIL"; fi
-if grep -rq 'error-msg\|showError\|loginError\|error-message\|error.*feedback\|setError\|errorMessage\|toast.*error\|toast.*Error' src/app/ app/ components/ 2>/dev/null; then ((u++)); check "U3: Error feedback" "PASS"; else check "U3: Error feedback" "FAIL"; fi
+if grep -rq 'filterSelect\|renderFiltered\|filterByStatus\|handleFilter\|FilterSelect\|applyFilter\|useFilter\|filterState\|selectedCategory\|categoryFilter\|onCategoryChange' src/app/ app/ components/ 2>/dev/null; then ((u++)); check "U2: Filter works" "PASS"; else check "U2: Filter works" "FAIL"; fi
+if grep -rq 'error-msg\|showError\|loginError\|error-message\|error.*feedback\|setError\|errorMessage\|toast.*error\|toast.*Error\|useError\|errorBoundary\|ErrorBoundary' src/app/ app/ components/ 2>/dev/null; then ((u++)); check "U3: Error feedback" "PASS"; else check "U3: Error feedback" "FAIL"; fi
 if grep -rq 'modal.*close\|closeModal\|refreshTasks\|showTasks\|setTasks\|mutate\|onSubmit\|router.*refresh\|router.*push' src/app/ app/ components/ 2>/dev/null; then ((u++)); check "U4: Create feedback" "PASS"; else check "U4: Create feedback" "FAIL"; fi
 if grep -rq 'spinner\|loading\|Loading\|isLoading\|Suspense\|skeleton\|Skeleton' src/app/ app/ components/ 2>/dev/null; then ((u++)); check "U5: Loading state" "PASS"; else check "U5: Loading state" "FAIL"; fi
 if grep -rq '@media\|responsive\|sm:\|md:\|lg:\|min-h-\|max-w-\|grid-cols' src/app/ app/ components/ styles/ 2>/dev/null; then ((u++)); check "U6: Responsive" "PASS"; else check "U6: Responsive" "FAIL"; fi
@@ -1071,12 +1071,12 @@ echo ""
 echo -e "${BOLD}🔎 SEO${NC}"
 se=0
 
-if grep -rq 'name="description"\|description:.*\|metadata.*description\|const.*description' src/app/ 2>/dev/null; then ((se++)); check "SEO1: Meta desc" "PASS"; else check "SEO1: Meta desc" "FAIL"; fi
-if grep -rq 'rel="canonical"\|canonical\|alternates.*canonical' src/app/ app/ 2>/dev/null; then ((se++)); check "SEO2: Canonical" "PASS"; else check "SEO2: Canonical" "FAIL"; fi
-if grep -rq 'og:title\|og:description\|openGraph\|open_graph\|metadata.*openGraph' src/app/ 2>/dev/null; then ((se++)); check "SEO3: OG tags" "PASS"; else check "SEO3: OG tags" "FAIL"; fi
+if grep -rq 'name="description"\|description:.*\|metadata.*description\|const.*description' src/app/ app/ 2>/dev/null; then ((se++)); check "SEO1: Meta desc" "PASS"; else check "SEO1: Meta desc" "FAIL"; fi
+if grep -rq 'rel="canonical"\|canonical\|alternates.*canonical' src/app/ app/ components/ 2>/dev/null; then ((se++)); check "SEO2: Canonical" "PASS"; else check "SEO2: Canonical" "FAIL"; fi
+if grep -rq 'og:title\|og:description\|openGraph\|open_graph\|metadata.*openGraph' src/app/ app/ 2>/dev/null; then ((se++)); check "SEO3: OG tags" "PASS"; else check "SEO3: OG tags" "FAIL"; fi
 if grep -rq 'application/ld+json\|jsonLd\|JSON-LD\|ld\+json' src/app/ 2>/dev/null; then ((se++)); check "SEO4: JSON-LD" "PASS"; else check "SEO4: JSON-LD" "FAIL"; fi
 if grep -rq '<header\|<main\|<section\|<article\|<nav' src/app/ app/ components/ 2>/dev/null; then ((se++)); check "SEO5: Semantic" "PASS"; else check "SEO5: Semantic" "FAIL"; fi
-if [ -f public/robots.txt ] || [ -f src/app/robots.ts ] || [ -f src/app/robots.js ]; then ((se++)); check "SEO6: robots.txt" "PASS"; else check "SEO6: robots.txt" "FAIL"; fi
+if [ -f public/robots.txt ] || [ -f src/app/robots.ts ] || [ -f src/app/robots.js ] || [ -f app/robots.ts ] || [ -f app/robots.js ]; then ((se++)); check "SEO6: robots.txt" "PASS"; else check "SEO6: robots.txt" "FAIL"; fi
 
 score_dimension "SEO" 6 $se
 echo ""
@@ -1192,6 +1192,7 @@ except: pass
   echo ""
 
   # ── Auth quality detection ──
+  # ── Parse all semantic results ──
   AUTH_QUALITY=$(echo "$SEMANTIC_OUTPUT" | python3 -c "
 import json,sys
 try:
@@ -1200,57 +1201,238 @@ try:
 except: print('unknown')
 " 2>/dev/null || echo "unknown")
 
+  AUTH_SYSTEM=$(echo "$SEMANTIC_OUTPUT" | python3 -c "
+import json,sys
+try:
+  data=json.load(sys.stdin)
+  print(data.get('auth',{}).get('system','none'))
+except: print('none')
+" 2>/dev/null || echo "none")
+
+  # Parse ESLint severity breakdown
+  ESLINT_ERRORS=$(echo "$SEMANTIC_OUTPUT" | python3 -c "
+import json,sys
+try:
+  data=json.load(sys.stdin)
+  findings=data.get('eslint',{}).get('findings',[])
+  print(sum(1 for f in findings if f.get('severity',0)==2))
+except: print(0)
+" 2>/dev/null || echo 0)
+
+  ESLINT_WARNINGS=$(echo "$SEMANTIC_OUTPUT" | python3 -c "
+import json,sys
+try:
+  data=json.load(sys.stdin)
+  findings=data.get('eslint',{}).get('findings',[])
+  print(sum(1 for f in findings if f.get('severity',0)==1))
+except: print(0)
+" 2>/dev/null || echo 0)
+
+  # Parse ESLint rules hit — for code quality analysis
+  ESLINT_RULES=$(echo "$SEMANTIC_OUTPUT" | python3 -c "
+import json,sys
+try:
+  data=json.load(sys.stdin)
+  findings=data.get('eslint',{}).get('findings',[])
+  rules=set(f.get('rule','') for f in findings if f.get('rule'))
+  print(','.join(sorted(rules)[:20]))
+except: print('')
+" 2>/dev/null || echo "")
+
+  # Parse npm audit severity breakdown
+  VULN_HIGH=$(echo "$SEMANTIC_OUTPUT" | python3 -c "
+import json,sys
+try:
+  data=json.load(sys.stdin)
+  meta=json.load(open('/tmp/opencode-semantic/npm-audit.json')).get('metadata',{}).get('vulnerabilities',{})
+  print(meta.get('high',0)+meta.get('critical',0))
+except: print(0)
+" 2>/dev/null || echo 0)
+
+  VULN_MODERATE=$(echo "$SEMANTIC_OUTPUT" | python3 -c "
+import json,sys
+try:
+  data=json.load(sys.stdin)
+  meta=json.load(open('/tmp/opencode-semantic/npm-audit.json')).get('metadata',{}).get('vulnerabilities',{})
+  print(meta.get('moderate',0))
+except: print(0)
+" 2>/dev/null || echo 0)
+
+  # Parse flake8/pylint count for Python projects
+  PYTHON_ISSUES=$(echo "$SEMANTIC_OUTPUT" | python3 -c "
+import json,sys
+try:
+  data=json.load(sys.stdin)
+  py=data.get('python',{})
+  print(py.get('total',0))
+except: print(0)
+" 2>/dev/null || echo 0)
+
   if [ "$AUTH_QUALITY" = "managed" ]; then
-    echo -e "  ${GREEN}🔐 Managed auth detected (Supabase/NextAuth/Clerk/Firebase)${NC}"
+    echo -e "  ${GREEN}🔐 Managed auth: $AUTH_SYSTEM${NC}"
   fi
 
-  # ── Semantic Score Boost: Adjust dimension scores based on semantic findings ──
-  SEMANTIC_BONUS=0
+  # ══════════════════════════════════════════════════════════════
+  # SEMANTIC SCORE BOOST — per-dimension adjustments
+  # ══════════════════════════════════════════════════════════════
+  # Track per-dimension bonuses for DIMENSION_RESULTS update
+  SEC_BOOST=0    # Security bonus
+  KQ_BOOST=0     # Code Quality bonus
+  AR_BOOST=0     # Architecture bonus
+  T_BOOST=0      # Test bonus
+  DOC_BOOST=0    # Documentation bonus
+  D_BOOST=0      # DevOps bonus
+
   echo ""
   echo -e "${BOLD}📊 SEMANTIC SCORE BOOST${NC}"
 
-  # Managed auth → +4 security points (S1, S4, S7, S8 handled by provider)
+  # ──── SECURITY BOOSTS ────
+  # Managed auth (Supabase/NextAuth/Clerk/Firebase) → +4
+  # These providers handle: auth, sessions, CSRF, rate limiting, secure cookies
   if [ "$AUTH_QUALITY" = "managed" ]; then
-    SEMANTIC_BONUS=$((SEMANTIC_BONUS + 4))
-    echo -e "  ${GREEN}✅ Security +4: Auth/CSP, env secrets, logout, secure session (managed provider)${NC}"
-    # Update security score
-    s=$((s + 4))
-    if [ $s -gt 12 ]; then s=12; fi
+    SEC_BOOST=$((SEC_BOOST + 4))
+    echo -e "  ${GREEN}✅ Security +4: Managed auth ($AUTH_SYSTEM) handles auth/sessions/CSRF${NC}"
   fi
 
-  # TSC 0 errors → +1 code quality
-  if [ "$TSC_TOTAL" = "0" ] && [ -f tsconfig.json ]; then
-    SEMANTIC_BONUS=$((SEMANTIC_BONUS + 1))
-    echo -e "  ${GREEN}✅ Code Quality +1: TypeScript compiler clean (0 errors)${NC}"
-    kq=$((kq + 1))
-    if [ $kq -gt 6 ]; then kq=6; fi
+  # Self-managed auth (JWT/Passport/OAuth/Session) → +2
+  if [ "$AUTH_QUALITY" = "self-managed" ]; then
+    SEC_BOOST=$((SEC_BOOST + 2))
+    echo -e "  ${GREEN}✅ Security +2: Auth system detected ($AUTH_SYSTEM)${NC}"
   fi
 
-  # npm audit 0 vulns → +2 security
+  # npm audit 0 vulnerabilities → +2
   if [ "$VULN_COUNT" = "0" ] && [ -f package.json ]; then
-    SEMANTIC_BONUS=$((SEMANTIC_BONUS + 2))
+    SEC_BOOST=$((SEC_BOOST + 2))
     echo -e "  ${GREEN}✅ Security +2: npm audit clean (0 vulnerabilities)${NC}"
-    s=$((s + 2))
-    if [ $s -gt 12 ]; then s=12; fi
   fi
 
-  # npm audit high/critical → -2 security (only if not already 100%)
+  # npm audit 1-2 low only → +1
+  if [ "$VULN_COUNT" -gt 0 ] && [ "$VULN_COUNT" -le 2 ] && [ "$VULN_HIGH" = "0" ]; then
+    SEC_BOOST=$((SEC_BOOST + 1))
+    echo -e "  ${GREEN}✅ Security +1: npm audit mostly clean ($VULN_COUNT low)${NC}"
+  fi
+
+  # npm audit high/critical vulnerabilities → -2 (only if not already 100%)
+  if [ "$VULN_HIGH" -gt 0 ] && [ "$s" -lt 12 ]; then
+    SEC_BOOST=$((SEC_BOOST - 2))
+    echo -e "  ${RED}❌ Security -2: $VULN_HIGH high/critical vulnerabilities in dependencies${NC}"
+  fi
+
+  # npm audit >5 total → -1 additional
   if [ "$VULN_COUNT" -gt 5 ] && [ "$s" -lt 12 ]; then
-    SEMANTIC_BONUS=$((SEMANTIC_BONUS - 2))
-    echo -e "  ${RED}❌ Security -2: $VULN_COUNT vulnerable dependencies detected${NC}"
-    s=$((s - 2))
-    if [ $s -lt 0 ]; then s=0; fi
+    SEC_BOOST=$((SEC_BOOST - 1))
+    echo -e "  ${RED}❌ Security -1: $VULN_COUNT total vulnerable dependencies${NC}"
   fi
 
-  echo -e "  ${BOLD}Semantic bonus: $SEMANTIC_BONUS points${NC}"
+  # ──── CODE QUALITY BOOSTS ────
+  # TypeScript compiler clean (0 errors) → +2
+  if [ "$TSC_TOTAL" = "0" ] && [ -f tsconfig.json ]; then
+    KQ_BOOST=$((KQ_BOOST + 2))
+    echo -e "  ${GREEN}✅ Code Quality +2: TypeScript compiler clean (0 errors)${NC}"
+  fi
+
+  # TypeScript compiler 1-3 errors → +1 (minor issues)
+  if [ "$TSC_TOTAL" -gt 0 ] && [ "$TSC_TOTAL" -le 3 ]; then
+    KQ_BOOST=$((KQ_BOOST + 1))
+    echo -e "  ${GREEN}✅ Code Quality +1: TypeScript mostly clean ($TSC_TOTAL errors)${NC}"
+  fi
+
+  # TypeScript compiler >10 errors → -1 (but only if code quality > 2/6)
+  if [ "$TSC_TOTAL" -gt 10 ] && [ "$kq" -gt 2 ]; then
+    KQ_BOOST=$((KQ_BOOST - 1))
+    echo -e "  ${RED}❌ Code Quality -1: $TSC_TOTAL TypeScript errors${NC}"
+  fi
+
+  # ESLint 0 errors → +1 (code follows best practices)
+  if [ "$ESLINT_ERRORS" = "0" ] && [ -f package.json ] && [ "$ESLINT_TOTAL" -gt -1 ]; then
+    KQ_BOOST=$((KQ_BOOST + 1))
+    echo -e "  ${GREEN}✅ Code Quality +1: ESLint 0 errors (clean code)${NC}"
+  fi
+  
+  # ESLint 1-5 errors only → +0 but informational
+  if [ "$ESLINT_ERRORS" -gt 0 ] && [ "$ESLINT_ERRORS" -le 5 ]; then
+    echo -e "  ${YELLOW}ℹ️  Code Quality: $ESLINT_ERRORS ESLint errors (minor)${NC}"
+  fi
+
+  # ESLint >10 errors → -1 (but only if code quality > 2/6)
+  if [ "$ESLINT_ERRORS" -gt 10 ] && [ "$kq" -gt 2 ]; then
+    KQ_BOOST=$((KQ_BOOST - 1))
+    echo -e "  ${RED}❌ Code Quality -1: $ESLINT_ERRORS ESLint errors${NC}"
+  fi
+
+  # ESLint eqeqeq or no-var rules present → +1 (good practices enforced)
+  if echo "$ESLINT_RULES" | grep -q "eqeqeq\|no-var\|prefer-const"; then
+    KQ_BOOST=$((KQ_BOOST + 0))  # Already covered by pattern checks
+  fi
+
+  # Python: flake8/pylint 0 issues → +2
+  if [ "$PYTHON_ISSUES" = "0" ] && [ -f pyproject.toml ] 2>/dev/null; then
+    KQ_BOOST=$((KQ_BOOST + 2))
+    echo -e "  ${GREEN}✅ Code Quality +2: Python linter clean (0 issues)${NC}"
+  fi
+
+  # Python: flake8/pylint 1-5 issues → +1
+  if [ "$PYTHON_ISSUES" -gt 0 ] && [ "$PYTHON_ISSUES" -le 5 ]; then
+    KQ_BOOST=$((KQ_BOOST + 1))
+    echo -e "  ${GREEN}✅ Code Quality +1: Python mostly clean ($PYTHON_ISSUES issues)${NC}"
+  fi
+
+  # ──── ARCHITECTURE BOOSTS ────
+  # TypeScript strict mode or noImplicitAny → +1
+  if [ -f tsconfig.json ] && grep -q "strict.*true\|noImplicitAny.*true" tsconfig.json 2>/dev/null; then
+    AR_BOOST=$((AR_BOOST + 1))
+    echo -e "  ${GREEN}✅ Architecture +1: TypeScript strict mode enabled${NC}"
+  fi
+
+  # ──── DEVOPS BOOSTS ────
+  # npm audit available (npm install works) → +0 (just informational)
+  # CI/CD detected via GitHub Actions → +1
+  if ls .github/workflows/*.yml 2>/dev/null | grep -q .; then
+    D_BOOST=$((D_BOOST + 1))
+    echo -e "  ${GREEN}✅ DevOps +1: GitHub Actions CI/CD detected${NC}"
+  fi
+
+  # Docker Compose detected → +1
+  if [ -f docker-compose.yml ] || [ -f compose.yml ] || [ -f compose.yaml ]; then
+    D_BOOST=$((D_BOOST + 1))
+    echo -e "  ${GREEN}✅ DevOps +1: Docker Compose detected${NC}"
+  fi
+
+  # ──── DOCUMENTATION BOOSTS ────
+  # TypeScript declaration files → +1 (self-documenting types)
+  if find . -name "*.d.ts" 2>/dev/null | head -1 | grep -q .; then
+    DOC_BOOST=$((DOC_BOOST + 1))
+    echo -e "  ${GREEN}✅ Documentation +1: TypeScript declaration files (self-documenting types)${NC}"
+  fi
+
+  # ──── Print summary ────
+  TOTAL_BOOST=$((SEC_BOOST + KQ_BOOST + AR_BOOST + T_BOOST + DOC_BOOST + D_BOOST))
+  if [ "$TOTAL_BOOST" -gt 0 ]; then
+    echo -e "  ${GREEN}${BOLD}Total semantic boost: +$TOTAL_BOOST points${NC}"
+  elif [ "$TOTAL_BOOST" -lt 0 ]; then
+    echo -e "  ${RED}${BOLD}Total semantic adjustment: $TOTAL_BOOST points${NC}"
+  else
+    echo -e "  ${YELLOW}No semantic adjustments applied${NC}"
+  fi
   echo ""
 
-  # Update DIMENSION_RESULTS with semantic-boosted scores
+  # ══════════════════════════════════════════════════════════════
+  # UPDATE DIMENSION_RESULTS with semantic-boosted scores
+  # ══════════════════════════════════════════════════════════════
   NEW_RESULTS=()
   for dim in "${DIMENSION_RESULTS[@]}"; do
     IFS='|' read -r name total fixed pct status <<< "$dim"
-    if [ "$name" = "Security" ] && [ "$SEMANTIC_BONUS" -ne 0 ]; then
-      fixed=$((fixed + SEMANTIC_BONUS))
+    boost=0
+    case "$name" in
+      Security)       boost=$SEC_BOOST ;;
+      "Code Quality") boost=$KQ_BOOST ;;
+      Architecture)   boost=$AR_BOOST ;;
+      Test)           boost=$T_BOOST ;;
+      Documentation)  boost=$DOC_BOOST ;;
+      DevOps)         boost=$D_BOOST ;;
+    esac
+    if [ "$boost" -ne 0 ]; then
+      fixed=$((fixed + boost))
       if [ $fixed -gt $total ]; then fixed=$total; fi
       if [ $fixed -lt 0 ]; then fixed=0; fi
       pct=$(( (fixed * 100) / total ))
