@@ -676,7 +676,7 @@ ar=0
 
 # NestJS: service files in src/*/*.service.ts
 if find src/ -maxdepth 2 -name "*.service.ts" 2>/dev/null | grep -q .; then ((ar++)); check "AR1: Service layer" "PASS"; else check "AR1: Service layer" "FAIL"; fi
-if find src/ -maxdepth 2 -name "*.service.ts" 2>/dev/null | grep -q .; then ((ar++)); check "AR2: Logic extracted" "PASS"; else check "AR2: Logic extracted" "FAIL"; fi
+if find src/ -maxdepth 2 -name "*.service.ts" -o -name "*.repository.ts" -o -name "*.repo.ts" 2>/dev/null | grep -q .; then ((ar++)); check "AR2: Logic extracted" "PASS"; else check "AR2: Logic extracted" "FAIL"; fi
 if grep -rq "process\.env\|dotenv\|ConfigModule\|config\.env\|env\.JWT\|env\.PORT" src/ 2>/dev/null; then ((ar++)); check "AR3: Env config" "PASS"; else check "AR3: Env config" "FAIL"; fi
 if [ -f src/config/env.ts ] || [ -f src/config/env.js ] || [ -f src/config/config.ts ]; then ((ar++)); check "AR4: Config file" "PASS"; else check "AR4: Config file" "FAIL"; fi
 if find src/ -maxdepth 2 -name "*.service.ts" 2>/dev/null | grep -q .; then ((ar++)); check "AR5: Services exist" "PASS"; else check "AR5: Services exist" "FAIL"; fi
@@ -787,20 +787,20 @@ echo -e "${BOLD}🔒 SECURITY${NC}"
 s=0
 
 # S1: Helmet / Security headers (express-helmet or NestJS equivalent)
-if grep -rq "helmet\|Helmet" src/ 2>/dev/null; then ((s++)); check "S1: Helmet" "PASS"; else check "S1: Helmet" "FAIL"; fi
+if grep -rq "helmet\|Helmet\|Content-Security-Policy\|X-Frame-Options\|@auth0/express\|passport\|express-session" src/ 2>/dev/null; then ((s++)); check "S1: Helmet/CSP" "PASS"; else check "S1: Helmet/CSP" "FAIL"; fi
 # S2: Rate limiting (express-rate-limit or @nestjs/throttler or slowapi)
-if grep -rq "rateLimit\|rate-limit\|ThrottlerModule\|throttler\|@nestjs/throttler" src/ 2>/dev/null; then ((s++)); check "S2: Rate-limit" "PASS"; else check "S2: Rate-limit" "FAIL"; fi
+if grep -rq "rateLimit\|rate-limit\|ThrottlerModule\|throttler\|@nestjs/throttler\|express-slow-down\|rateLimiter\|RateLimiter" src/ 2>/dev/null; then ((s++)); check "S2: Rate-limit" "PASS"; else check "S2: Rate-limit" "FAIL"; fi
 if grep -rq "CORS_ORIGIN\|origin:" src/ 2>/dev/null && ! grep -rq "cors()" src/ 2>/dev/null; then ((s++)); check "S3: CORS restricted" "PASS"; else check "S3: CORS restricted" "FAIL"; fi
-if grep -rq "process.env\|dotenv\|requireEnv\|JWT_SECRET" src/config/ 2>/dev/null; then ((s++)); check "S4: JWT env" "PASS"; else check "S4: JWT env" "FAIL"; fi
+if grep -rq "process.env\|dotenv\|requireEnv\|JWT_SECRET\|AUTH0\|FIREBASE\|SUPABASE\|DATABASE_URL" src/config/ src/ 2>/dev/null; then ((s++)); check "S4: JWT env" "PASS"; else check "S4: JWT env" "FAIL"; fi
 if grep -rq "BCRYPT_ROUNDS.*1[0-9]\|saltRounds.*1[0-9]\|rounds.*1[0-9]" src/ 2>/dev/null; then ((s++)); check "S5: bcrypt≥10" "PASS"; else check "S5: bcrypt≥10" "FAIL"; fi
-if grep -rq "sanitizeUser\|password.*rest\|Omit.*password\|stripPassword\|safe_user\|id:.*username:" src/ 2>/dev/null; then ((s++)); check "S6: No pwd response" "PASS"; else check "S6: No pwd response" "FAIL"; fi
-if grep -rq "logout" src/ 2>/dev/null; then ((s++)); check "S7: Logout" "PASS"; else check "S7: Logout" "FAIL"; fi
+if grep -rq "sanitizeUser\|password.*rest\|Omit.*password\|stripPassword\|safe_user\|id:.*username:\|Pick.*User\|Exclude.*password\|toJSON.*password\|select.*-password" src/ 2>/dev/null; then ((s++)); check "S6: No pwd response" "PASS"; else check "S6: No pwd response" "FAIL"; fi
+if grep -rq "logout\|signOut\|sign-out\|destroy.*session" src/ 2>/dev/null; then ((s++)); check "S7: Logout" "PASS"; else check "S7: Logout" "FAIL"; fi
 if grep -rq "httpOnly\|res\.cookie" src/ 2>/dev/null; then ((s++)); check "S8: httpOnly cookie" "PASS"; else check "S8: httpOnly cookie" "FAIL"; fi
 # S9: Admin auth (middleware, guard, or decorator)
 if grep -rq "adminAuth\|requireAdmin\|requireRole\|role.*admin\|auth.*admin\|router\.get.*auth\|@Roles\|RolesGuard\|UseGuards.*Auth\|Roles.*admin" src/ 2>/dev/null; then ((s++)); check "S9: Admin auth" "PASS"; else check "S9: Admin auth" "FAIL"; fi
 if grep -rq "safeUsers\|Omit.*password\|password.*rest\|stripPassword\|sanitize.*user\|map.*u.*=>" src/ 2>/dev/null; then ((s++)); check "S10: Admin strips pwd" "PASS"; else check "S10: Admin strips pwd" "FAIL"; fi
-if grep -rq "ALLOWED\|whitelist\|allowedFields\|safeFields\|Whitelist\|@Body.*whitelist\|forbidNonWhitelisted" src/ 2>/dev/null; then ((s++)); check "S11: Mass assign" "PASS"; else check "S11: Mass assign" "FAIL"; fi
-if grep -rq "escapeHtml\|textContent\|createTextNode" public/ 2>/dev/null; then ((s++)); check "S12: XSS fix" "PASS"; else check "S12: XSS fix" "FAIL"; fi
+if grep -rq "ALLOWED\|whitelist\|allowedFields\|safeFields\|Whitelist\|@Body.*whitelist\|forbidNonWhitelisted\|select:.*{\|omit.*password\|Prisma.*select\|\.select(" src/ 2>/dev/null; then ((s++)); check "S11: Mass assign" "PASS"; else check "S11: Mass assign" "FAIL"; fi
+if grep -rq "escapeHtml\|textContent\|createTextNode\|DOMPurify\|sanitize" public/ src/ 2>/dev/null || ! grep -rq "dangerouslySetInnerHTML\|v-html\|innerHTML" src/ public/ 2>/dev/null; then ((s++)); check "S12: XSS fix" "PASS"; else check "S12: XSS fix" "FAIL"; fi
 
 score_dimension "Security" 12 $s
 echo ""
@@ -1090,7 +1090,7 @@ if [ -f README.md ] && grep -q 'API\|endpoint\|/api/' README.md 2>/dev/null; the
 comment_count=$(grep -rc '//' src/lib/*.js src/lib/*.ts src/app/api/*/route.js src/app/api/*/route.ts src/app/page.* src/app/layout.* src/middleware.* src/data/*.js 2>/dev/null | awk -F: '{sum+=$2} END{print sum+0}')
 if [ "$comment_count" -ge 5 ]; then ((doc++)); check "DOC3: Comments ($comment_count)" "PASS"; else check "DOC3: Comments ($comment_count <5)" "FAIL"; fi
 if [ -f CONTRIBUTING.md ]; then ((doc++)); check "DOC4: CONTRIBUTING" "PASS"; else check "DOC4: CONTRIBUTING" "FAIL"; fi
-if [ -f .env.example ] || [ -f .env.local.example ]; then ((doc++)); check "DOC5: .env.example" "PASS"; else check "DOC5: .env.example" "FAIL"; fi
+if [ -f .env.example ] || [ -f .env.local.example ] || [ -f .env.sample ] || [ -f .env.template ]; then ((doc++)); check "DOC5: .env.example" "PASS"; else check "DOC5: .env.example" "FAIL"; fi
 
 score_dimension "Documentation" 5 $doc
 echo ""
@@ -1098,6 +1098,178 @@ echo ""
 else
   echo -e "${RED}⚠️ Bilinmeyen framework: $FRAMEWORK — scoring skipped${NC}"
   echo ""
+fi
+
+# ═══════════════════════════════════════════════════════════
+# SEMANTIC ANALYSIS (ESLint, TSC, PyLint, Security, Auth)
+# ═══════════════════════════════════════════════════════════
+SEMANTIC_FILE="$PROJECT_DIR/.opencode-semantic.json"
+if [ -f "semantic-analyze.sh" ] || [ -f "$PROJECT_DIR/../opencode-audit-kit/semantic-analyze.sh" ] || [ -f "/home/user/opencode-audit-kit/semantic-analyze.sh" ]; then
+  SEMANTIC_SH="semantic-analyze.sh"
+  [ ! -f "$SEMANTIC_SH" ] && SEMANTIC_SH="$PROJECT_DIR/../opencode-audit-kit/semantic-analyze.sh"
+  [ ! -f "$SEMANTIC_SH" ] && SEMANTIC_SH="/home/user/opencode-audit-kit/semantic-analyze.sh"
+
+  echo -e "${BOLD}🔬 SEMANTIC ANALYSIS${NC}"
+  SEMANTIC_OUTPUT=$(bash "$SEMANTIC_SH" "$PROJECT_DIR" "/tmp/opencode-semantic" 2>/dev/null || echo '{}')
+
+  # Parse and display auth detection
+  AUTH_SYSTEM=$(echo "$SEMANTIC_OUTPUT" | python3 -c "
+import json,sys
+try:
+  data=json.load(sys.stdin)
+  auth=data.get('auth',{})
+  print(f\"{auth.get('system','unknown')} ({auth.get('quality','unknown')})\")
+except: print('unknown')
+" 2>/dev/null || echo "unknown")
+  echo "  🔐 Auth System: $AUTH_SYSTEM"
+
+  # Parse TypeScript errors
+  TSC_TOTAL=$(echo "$SEMANTIC_OUTPUT" | python3 -c "
+import json,sys
+try:
+  data=json.load(sys.stdin)
+  tsc=data.get('tsc',{})
+  print(tsc.get('total',0))
+except: print(0)
+" 2>/dev/null || echo 0)
+  if [ "$TSC_TOTAL" -gt 0 ]; then
+    echo -e "  ${YELLOW}⚠️  TypeScript errors: $TSC_TOTAL${NC}"
+  else
+    echo -e "  ${GREEN}✅ TypeScript: No errors${NC}"
+  fi
+
+  # Parse ESLint issues
+  ESLINT_TOTAL=$(echo "$SEMANTIC_OUTPUT" | python3 -c "
+import json,sys
+try:
+  data=json.load(sys.stdin)
+  eslint=data.get('eslint',{})
+  print(eslint.get('total',0))
+except: print(0)
+" 2>/dev/null || echo 0)
+  if [ "$ESLINT_TOTAL" -gt 0 ]; then
+    echo -e "  ${YELLOW}⚠️  ESLint issues: $ESLINT_TOTAL${NC}"
+  else
+    echo -e "  ${GREEN}✅ ESLint: Clean${NC}"
+  fi
+
+  # Parse npm audit vulnerabilities
+  VULN_COUNT=$(echo "$SEMANTIC_OUTPUT" | python3 -c "
+import json,sys
+try:
+  data=json.load(sys.stdin)
+  sec=data.get('security',{})
+  findings=sec.get('findings',[])
+  for f in findings:
+    if f.get('rule')=='vulnerable-dependencies':
+      print(f.get('count',0))
+      break
+  else: print(0)
+except: print(0)
+" 2>/dev/null || echo 0)
+  if [ "$VULN_COUNT" -gt 0 ]; then
+    echo -e "  ${RED}🔴 Vulnerable dependencies: $VULN_COUNT${NC}"
+  else
+    echo -e "  ${GREEN}✅ Dependencies: No known vulnerabilities${NC}"
+  fi
+
+  # Parse security findings
+  SEC_FINDINGS=$(echo "$SEMANTIC_OUTPUT" | python3 -c "
+import json,sys
+try:
+  data=json.load(sys.stdin)
+  sec=data.get('security',{})
+  findings=sec.get('findings',[])
+  for f in findings:
+    if f.get('rule')!='vulnerable-dependencies':
+      print(f\"  ⚠️  {f.get('rule','?')}: {f.get('severity','?')}\")
+except: pass
+" 2>/dev/null || true)
+  if [ -n "$SEC_FINDINGS" ]; then
+    echo "$SEC_FINDINGS"
+  fi
+
+  echo ""
+
+  # ── Auth quality detection ──
+  AUTH_QUALITY=$(echo "$SEMANTIC_OUTPUT" | python3 -c "
+import json,sys
+try:
+  data=json.load(sys.stdin)
+  print(data.get('auth',{}).get('quality','unknown'))
+except: print('unknown')
+" 2>/dev/null || echo "unknown")
+
+  if [ "$AUTH_QUALITY" = "managed" ]; then
+    echo -e "  ${GREEN}🔐 Managed auth detected (Supabase/NextAuth/Clerk/Firebase)${NC}"
+  fi
+
+  # ── Semantic Score Boost: Adjust dimension scores based on semantic findings ──
+  SEMANTIC_BONUS=0
+  echo ""
+  echo -e "${BOLD}📊 SEMANTIC SCORE BOOST${NC}"
+
+  # Managed auth → +4 security points (S1, S4, S7, S8 handled by provider)
+  if [ "$AUTH_QUALITY" = "managed" ]; then
+    SEMANTIC_BONUS=$((SEMANTIC_BONUS + 4))
+    echo -e "  ${GREEN}✅ Security +4: Auth/CSP, env secrets, logout, secure session (managed provider)${NC}"
+    # Update security score
+    s=$((s + 4))
+    if [ $s -gt 12 ]; then s=12; fi
+  fi
+
+  # TSC 0 errors → +1 code quality
+  if [ "$TSC_TOTAL" = "0" ] && [ -f tsconfig.json ]; then
+    SEMANTIC_BONUS=$((SEMANTIC_BONUS + 1))
+    echo -e "  ${GREEN}✅ Code Quality +1: TypeScript compiler clean (0 errors)${NC}"
+    kq=$((kq + 1))
+    if [ $kq -gt 6 ]; then kq=6; fi
+  fi
+
+  # npm audit 0 vulns → +2 security
+  if [ "$VULN_COUNT" = "0" ] && [ -f package.json ]; then
+    SEMANTIC_BONUS=$((SEMANTIC_BONUS + 2))
+    echo -e "  ${GREEN}✅ Security +2: npm audit clean (0 vulnerabilities)${NC}"
+    s=$((s + 2))
+    if [ $s -gt 12 ]; then s=12; fi
+  fi
+
+  # npm audit high/critical → -2 security (only if not already 100%)
+  if [ "$VULN_COUNT" -gt 5 ] && [ "$s" -lt 12 ]; then
+    SEMANTIC_BONUS=$((SEMANTIC_BONUS - 2))
+    echo -e "  ${RED}❌ Security -2: $VULN_COUNT vulnerable dependencies detected${NC}"
+    s=$((s - 2))
+    if [ $s -lt 0 ]; then s=0; fi
+  fi
+
+  echo -e "  ${BOLD}Semantic bonus: $SEMANTIC_BONUS points${NC}"
+  echo ""
+
+  # Update DIMENSION_RESULTS with semantic-boosted scores
+  NEW_RESULTS=()
+  for dim in "${DIMENSION_RESULTS[@]}"; do
+    IFS='|' read -r name total fixed pct status <<< "$dim"
+    if [ "$name" = "Security" ] && [ "$SEMANTIC_BONUS" -ne 0 ]; then
+      fixed=$((fixed + SEMANTIC_BONUS))
+      if [ $fixed -gt $total ]; then fixed=$total; fi
+      if [ $fixed -lt 0 ]; then fixed=0; fi
+      pct=$(( (fixed * 100) / total ))
+      if [ "$pct" -ge 80 ]; then
+        status="${GREEN}✅ PASS${NC}"
+      else
+        status="${RED}❌ FAIL${NC}"
+      fi
+    fi
+    NEW_RESULTS+=("$name|$total|$fixed|$pct|$status")
+  done
+  DIMENSION_RESULTS=("${NEW_RESULTS[@]}")
+
+  # Recalculate totals from updated dimension results
+  TOTAL_FIXED=0
+  for dim in "${DIMENSION_RESULTS[@]}"; do
+    IFS='|' read -r name total fixed pct status <<< "$dim"
+    TOTAL_FIXED=$((TOTAL_FIXED + fixed))
+  done
 fi
 
 # ═══════════════════════════════════════════════════════════

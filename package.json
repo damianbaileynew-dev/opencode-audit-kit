@@ -1,7 +1,7 @@
 {
   "name": "@dejavuxer/opencode-audit-kit",
   "version": "2.0.0",
-  "description": "10-dimension automated code audit kit for OpenCode AI \u2014 Security, Performance, Code Quality, Architecture, Test, Accessibility, UX, DevOps, SEO, Documentation. Supports Express.js, TypeScript/Express, FastAPI, and NestJS.",
+  "description": "10-dimension automated code audit kit for OpenCode AI — Security, Performance, Code Quality, Architecture, Test, Accessibility, UX, DevOps, SEO, Documentation. Supports Express.js, TypeScript/Express, FastAPI, and NestJS.",
   "main": "index.js",
   "bin": {
     "opencode-audit": "./cli.js",
@@ -68,5 +68,9 @@
     "README.md",
     "LICENSE",
     "docs/"
-  ]
+  ],
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.5.0"
+  }
 }
