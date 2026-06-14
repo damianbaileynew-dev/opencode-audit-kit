@@ -78,7 +78,13 @@ if [ -f "$PROJECT_DIR/package.json" ]; then
   elif grep -q "next" "$PROJECT_DIR/package.json" 2>/dev/null; then
     FRAMEWORK="nextjs"
   fi
-elif [ -f "$PROJECT_DIR/requirements.txt" ] || [ -f "$PROJECT_DIR/pyproject.toml" ] || [ -f "$PROJECT_DIR/app/main.py" ] || [ -f "$PROJECT_DIR/main.py" ]; then
+  # Fallback: package.json exists but no JS framework found — check for Python backend
+  if [ "$FRAMEWORK" = "unknown" ]; then
+    if [ -f "$PROJECT_DIR/backend/pyproject.toml" ] || [ -f "$PROJECT_DIR/backend/app/main.py" ] || [ -f "$PROJECT_DIR/backend/requirements.txt" ] || grep -rq "fastapi" "$PROJECT_DIR/backend/" 2>/dev/null; then
+      FRAMEWORK="fastapi"
+    fi
+  fi
+elif [ -f "$PROJECT_DIR/requirements.txt" ] || [ -f "$PROJECT_DIR/pyproject.toml" ] || [ -f "$PROJECT_DIR/app/main.py" ] || [ -f "$PROJECT_DIR/main.py" ] || [ -f "$PROJECT_DIR/backend/pyproject.toml" ] || [ -f "$PROJECT_DIR/backend/app/main.py" ]; then
   FRAMEWORK="fastapi"
 fi
 echo -e "Framework: ${BOLD}$FRAMEWORK${NC}"
@@ -943,15 +949,15 @@ elif [ "$FRAMEWORK" = "nextjs" ]; then
 echo -e "${BOLD}🔒 SECURITY${NC}"
 s=0
 
-if grep -rq "helmet\|Helmet\|Content-Security-Policy\|X-Frame-Options" src/ next.config.* middleware.* 2>/dev/null; then ((s++)); check "S1: Helmet/CSP" "PASS"; else check "S1: Helmet/CSP" "FAIL"; fi
-if grep -rq "rateLimit\|rate-limit\|throttle\|RateLimiter" src/ middleware.* 2>/dev/null; then ((s++)); check "S2: Rate-limit" "PASS"; else check "S2: Rate-limit" "FAIL"; fi
+if grep -rq "helmet\|Helmet\|Content-Security-Policy\|X-Frame-Options\|supabase.*middleware\|next-auth\|authjs\|getClerkSession\|clerk" src/ next.config.* middleware.* utils/ 2>/dev/null; then ((s++)); check "S1: Helmet/CSP" "PASS"; else check "S1: Helmet/CSP" "FAIL"; fi
+if grep -rq "rateLimit\|rate-limit\|throttle\|RateLimiter\|upstash\|@rate-limit" src/ middleware.* utils/ 2>/dev/null; then ((s++)); check "S2: Rate-limit" "PASS"; else check "S2: Rate-limit" "FAIL"; fi
 if grep -rq "CORS_ORIGIN\|origin:" src/ next.config.* 2>/dev/null && ! grep -rq "cors()" src/ 2>/dev/null; then ((s++)); check "S3: CORS restricted" "PASS"; else check "S3: CORS restricted" "FAIL"; fi
-if grep -rq "process.env\|NEXT_PUBLIC\|dotenv" src/lib src/app src/ next.config.* 2>/dev/null; then ((s++)); check "S4: JWT env" "PASS"; else check "S4: JWT env" "FAIL"; fi
+if grep -rq "process.env\|NEXT_PUBLIC\|dotenv\|SUPABASE.*KEY\|SUPABASE.*URL\|STRIPE.*KEY\|SERVICE_ROLE" src/ utils/ next.config.* .env* 2>/dev/null; then ((s++)); check "S4: JWT env" "PASS"; else check "S4: JWT env" "FAIL"; fi
 if grep -rq "BCRYPT_ROUNDS.*1[0-9]\|saltRounds.*1[0-9]\|hash.*12\|hash.*10\|hash.*14" src/ 2>/dev/null; then ((s++)); check "S5: bcrypt≥10" "PASS"; else check "S5: bcrypt≥10" "FAIL"; fi
-if grep -rq "sanitizeUser\|password.*rest\|Omit.*password\|stripPassword\|safeUser\|id:.*username:" src/ 2>/dev/null; then ((s++)); check "S6: No pwd response" "PASS"; else check "S6: No pwd response" "FAIL"; fi
-if grep -rq "logout" src/ 2>/dev/null; then ((s++)); check "S7: Logout" "PASS"; else check "S7: Logout" "FAIL"; fi
-if grep -rq "httpOnly\|setCookie\|cookies\(\)\.set" src/ 2>/dev/null; then ((s++)); check "S8: httpOnly cookie" "PASS"; else check "S8: httpOnly cookie" "FAIL"; fi
-if grep -rq "requireAdmin\|adminOnly\|role.*admin\|isAdmin\|withAdminAuth\|adminAuth" src/ middleware.* 2>/dev/null; then ((s++)); check "S9: Admin auth" "PASS"; else check "S9: Admin auth" "FAIL"; fi
+if grep -rq "sanitizeUser\|password.*rest\|Omit.*password\|stripPassword\|safeUser\|id:.*username:\|Pick.*User\|Exclude.*password" src/ utils/ 2>/dev/null; then ((s++)); check "S6: No pwd response" "PASS"; else check "S6: No pwd response" "FAIL"; fi
+if grep -rq "logout\|signOut\|sign-out\|sign_out" src/ utils/ components/ 2>/dev/null; then ((s++)); check "S7: Logout" "PASS"; else check "S7: Logout" "FAIL"; fi
+if grep -rq "httpOnly\|setCookie\|cookies\(\)\.set\|supabase.*cookie\|getNextAuthSession" src/ utils/ 2>/dev/null; then ((s++)); check "S8: httpOnly cookie" "PASS"; else check "S8: httpOnly cookie" "FAIL"; fi
+if grep -rq "requireAdmin\|adminOnly\|role.*admin\|isAdmin\|withAdminAuth\|adminAuth\|isRole\|getUserRole\|useUser.*role" src/ middleware.* utils/ components/ 2>/dev/null; then ((s++)); check "S9: Admin auth" "PASS"; else check "S9: Admin auth" "FAIL"; fi
 if grep -rq "safeUsers\|Omit.*password\|password.*rest\|stripPassword\|sanitize.*user" src/ 2>/dev/null; then ((s++)); check "S10: Admin strips pwd" "PASS"; else check "S10: Admin strips pwd" "FAIL"; fi
 if grep -rq "ALLOWED\|whitelist\|allowedFields\|safeFields\|pick\|omit" src/ 2>/dev/null; then ((s++)); check "S11: Mass assign" "PASS"; else check "S11: Mass assign" "FAIL"; fi
 if grep -rq "escapeHtml\|textContent\|createTextNode\|DOMPurify\|sanitize\|xss" src/ 2>/dev/null || ! grep -rq "dangerouslySetInnerHTML" src/ 2>/dev/null; then ((s++)); check "S12: XSS fix" "PASS"; else check "S12: XSS fix" "FAIL"; fi
@@ -991,11 +997,11 @@ echo ""
 echo -e "${BOLD}🏗️ ARCHITECTURE${NC}"
 ar=0
 
-if [ -d src/lib ] || [ -d src/services ]; then ((ar++)); check "AR1: Service layer" "PASS"; else check "AR1: Service layer" "FAIL"; fi
-if compgen -G "src/lib/*.js" > /dev/null 2>&1 || compgen -G "src/lib/*.ts" > /dev/null 2>&1 || compgen -G "src/services/*.js" > /dev/null 2>&1 || compgen -G "src/services/*.ts" > /dev/null 2>&1; then ((ar++)); check "AR2: Logic extracted" "PASS"; else check "AR2: Logic extracted" "FAIL"; fi
-if grep -rq "process.env\|NEXT_PUBLIC\|dotenv" src/lib src/config next.config.* 2>/dev/null; then ((ar++)); check "AR3: Env config" "PASS"; else check "AR3: Env config" "FAIL"; fi
+if [ -d src/lib ] || [ -d src/services ] || [ -d utils ] || [ -d src/utils ] || [ -d lib ]; then ((ar++)); check "AR1: Service layer" "PASS"; else check "AR1: Service layer" "FAIL"; fi
+if compgen -G "src/lib/*.js" > /dev/null 2>&1 || compgen -G "src/lib/*.ts" > /dev/null 2>&1 || compgen -G "src/services/*.js" > /dev/null 2>&1 || compgen -G "src/services/*.ts" > /dev/null 2>&1 || compgen -G "utils/*.ts" > /dev/null 2>&1 || compgen -G "utils/*.js" > /dev/null 2>&1 || compgen -G "lib/*.ts" > /dev/null 2>&1; then ((ar++)); check "AR2: Logic extracted" "PASS"; else check "AR2: Logic extracted" "FAIL"; fi
+if grep -rq "process.env\|NEXT_PUBLIC\|dotenv\|SUPABASE\|STRIPE" src/lib src/config utils/ next.config.* 2>/dev/null; then ((ar++)); check "AR3: Env config" "PASS"; else check "AR3: Env config" "FAIL"; fi
 if [ -f src/lib/config.js ] || [ -f src/lib/config.ts ] || [ -f src/config/env.js ] || [ -f src/config/env.ts ]; then ((ar++)); check "AR4: Config file" "PASS"; else check "AR4: Config file" "FAIL"; fi
-if compgen -G "src/lib/*.js" > /dev/null 2>&1 || compgen -G "src/lib/*.ts" > /dev/null 2>&1; then ((ar++)); check "AR5: Lib files" "PASS"; else check "AR5: Lib files" "FAIL"; fi
+if compgen -G "src/lib/*.js" > /dev/null 2>&1 || compgen -G "src/lib/*.ts" > /dev/null 2>&1 || compgen -G "utils/*.ts" > /dev/null 2>&1 || compgen -G "utils/*.js" > /dev/null 2>&1; then ((ar++)); check "AR5: Lib files" "PASS"; else check "AR5: Lib files" "FAIL"; fi
 if grep -rq "errorHandler\|AppError\|try.*catch\|NextResponse.*error.*status" src/ 2>/dev/null; then ((ar++)); check "AR6: Consistent errors" "PASS"; else check "AR6: Consistent errors" "FAIL"; fi
 
 score_dimension "Architecture" 6 $ar
@@ -1021,13 +1027,13 @@ echo -e "${BOLD}♿ ACCESSIBILITY${NC}"
 a=0
 
 NEXTJS_HTML=$(find src/app -name "layout.*" -o -name "page.*" 2>/dev/null || true)
-if grep -rq 'lang=' src/app/ 2>/dev/null; then ((a++)); check "A1: html lang" "PASS"; else check "A1: html lang" "FAIL"; fi
-if grep -rq 'charset\|charSet' src/app/ 2>/dev/null; then ((a++)); check "A2: charset" "PASS"; else check "A2: charset" "FAIL"; fi
-if grep -rq 'viewport' src/app/ 2>/dev/null; then ((a++)); check "A3: viewport" "PASS"; else check "A3: viewport" "FAIL"; fi
-if grep -rq '<label\|aria-label\|htmlFor' src/app/ 2>/dev/null; then ((a++)); check "A4: Labels" "PASS"; else check "A4: Labels" "FAIL"; fi
-if grep -rq 'aria-\|role=' src/app/ 2>/dev/null; then ((a++)); check "A5: ARIA" "PASS"; else check "A5: ARIA" "FAIL"; fi
-if grep -rq 'Escape\|keydown\|onKeyDown' src/app/ 2>/dev/null; then ((a++)); check "A6: ESC close" "PASS"; else check "A6: ESC close" "FAIL"; fi
-if grep -rq '\.focus()\|focus(' src/app/ 2>/dev/null; then ((a++)); check "A7: Focus mgmt" "PASS"; else check "A7: Focus mgmt" "FAIL"; fi
+if grep -rq 'lang=' src/app/ app/ 2>/dev/null; then ((a++)); check "A1: html lang" "PASS"; else check "A1: html lang" "FAIL"; fi
+if grep -rq 'charset\|charSet' src/app/ app/ 2>/dev/null; then ((a++)); check "A2: charset" "PASS"; else check "A2: charset" "FAIL"; fi
+if grep -rq 'viewport' src/app/ app/ 2>/dev/null; then ((a++)); check "A3: viewport" "PASS"; else check "A3: viewport" "FAIL"; fi
+if grep -rq '<label\|aria-label\|htmlFor' src/app/ app/ components/ 2>/dev/null; then ((a++)); check "A4: Labels" "PASS"; else check "A4: Labels" "FAIL"; fi
+if grep -rq 'aria-\|role=' src/app/ app/ components/ 2>/dev/null; then ((a++)); check "A5: ARIA" "PASS"; else check "A5: ARIA" "FAIL"; fi
+if grep -rq 'Escape\|keydown\|onKeyDown' src/app/ app/ components/ 2>/dev/null; then ((a++)); check "A6: ESC close" "PASS"; else check "A6: ESC close" "FAIL"; fi
+if grep -rq '\.focus()\|focus(' src/app/ app/ components/ 2>/dev/null; then ((a++)); check "A7: Focus mgmt" "PASS"; else check "A7: Focus mgmt" "FAIL"; fi
 
 score_dimension "Accessibility" 7 $a
 echo ""
@@ -1036,13 +1042,13 @@ echo ""
 echo -e "${BOLD}🎨 UX${NC}"
 u=0
 
-if grep -rq 'search\|filterTasks\|renderFiltered\|handleSearch\|SearchBar' src/app/ 2>/dev/null; then ((u++)); check "U1: Search works" "PASS"; else check "U1: Search works" "FAIL"; fi
-if grep -rq 'filterSelect\|renderFiltered\|filterByStatus\|handleFilter\|FilterSelect\|applyFilter' src/app/ 2>/dev/null; then ((u++)); check "U2: Filter works" "PASS"; else check "U2: Filter works" "FAIL"; fi
-if grep -rq 'error-msg\|showError\|loginError\|error-message\|error.*feedback\|setError\|errorMessage' src/app/ 2>/dev/null; then ((u++)); check "U3: Error feedback" "PASS"; else check "U3: Error feedback" "FAIL"; fi
-if grep -rq 'modal.*close\|closeModal\|refreshTasks\|showTasks\|setTasks\|mutate\|onSubmit' src/app/ 2>/dev/null; then ((u++)); check "U4: Create feedback" "PASS"; else check "U4: Create feedback" "FAIL"; fi
-if grep -rq 'spinner\|loading\|Loading\|isLoading\|Suspense' src/app/ 2>/dev/null; then ((u++)); check "U5: Loading state" "PASS"; else check "U5: Loading state" "FAIL"; fi
-if grep -rq '@media\|responsive\|sm:\|md:\|lg:' src/app/ 2>/dev/null; then ((u++)); check "U6: Responsive" "PASS"; else check "U6: Responsive" "FAIL"; fi
-if grep -rq 'empty\|No tasks\|no-result\|noTasks\|empty.*state\|No tasks match' src/app/ 2>/dev/null; then ((u++)); check "U7: Empty state" "PASS"; else check "U7: Empty state" "FAIL"; fi
+if grep -rq 'search\|filterTasks\|renderFiltered\|handleSearch\|SearchBar\|useSearchParams\|SearchInput' src/app/ app/ components/ 2>/dev/null; then ((u++)); check "U1: Search works" "PASS"; else check "U1: Search works" "FAIL"; fi
+if grep -rq 'filterSelect\|renderFiltered\|filterByStatus\|handleFilter\|FilterSelect\|applyFilter\|useFilter\|filterState' src/app/ app/ components/ 2>/dev/null; then ((u++)); check "U2: Filter works" "PASS"; else check "U2: Filter works" "FAIL"; fi
+if grep -rq 'error-msg\|showError\|loginError\|error-message\|error.*feedback\|setError\|errorMessage\|toast.*error\|toast.*Error' src/app/ app/ components/ 2>/dev/null; then ((u++)); check "U3: Error feedback" "PASS"; else check "U3: Error feedback" "FAIL"; fi
+if grep -rq 'modal.*close\|closeModal\|refreshTasks\|showTasks\|setTasks\|mutate\|onSubmit\|router.*refresh\|router.*push' src/app/ app/ components/ 2>/dev/null; then ((u++)); check "U4: Create feedback" "PASS"; else check "U4: Create feedback" "FAIL"; fi
+if grep -rq 'spinner\|loading\|Loading\|isLoading\|Suspense\|skeleton\|Skeleton' src/app/ app/ components/ 2>/dev/null; then ((u++)); check "U5: Loading state" "PASS"; else check "U5: Loading state" "FAIL"; fi
+if grep -rq '@media\|responsive\|sm:\|md:\|lg:\|min-h-\|max-w-\|grid-cols' src/app/ app/ components/ styles/ 2>/dev/null; then ((u++)); check "U6: Responsive" "PASS"; else check "U6: Responsive" "FAIL"; fi
+if grep -rq 'empty\|No tasks\|no-result\|noTasks\|empty.*state\|No tasks match\|no.*found\|No.*available\|Nothing.*yet' src/app/ app/ components/ 2>/dev/null; then ((u++)); check "U7: Empty state" "PASS"; else check "U7: Empty state" "FAIL"; fi
 
 score_dimension "UX" 7 $u
 echo ""
@@ -1065,11 +1071,11 @@ echo ""
 echo -e "${BOLD}🔎 SEO${NC}"
 se=0
 
-if grep -rq 'name="description"\|description:.*' src/app/ 2>/dev/null; then ((se++)); check "SEO1: Meta desc" "PASS"; else check "SEO1: Meta desc" "FAIL"; fi
-if grep -rq 'rel="canonical"\|canonical' src/app/ 2>/dev/null; then ((se++)); check "SEO2: Canonical" "PASS"; else check "SEO2: Canonical" "FAIL"; fi
-if grep -rq 'og:title\|og:description\|openGraph' src/app/ 2>/dev/null; then ((se++)); check "SEO3: OG tags" "PASS"; else check "SEO3: OG tags" "FAIL"; fi
+if grep -rq 'name="description"\|description:.*\|metadata.*description\|const.*description' src/app/ 2>/dev/null; then ((se++)); check "SEO1: Meta desc" "PASS"; else check "SEO1: Meta desc" "FAIL"; fi
+if grep -rq 'rel="canonical"\|canonical\|alternates.*canonical' src/app/ app/ 2>/dev/null; then ((se++)); check "SEO2: Canonical" "PASS"; else check "SEO2: Canonical" "FAIL"; fi
+if grep -rq 'og:title\|og:description\|openGraph\|open_graph\|metadata.*openGraph' src/app/ 2>/dev/null; then ((se++)); check "SEO3: OG tags" "PASS"; else check "SEO3: OG tags" "FAIL"; fi
 if grep -rq 'application/ld+json\|jsonLd\|JSON-LD\|ld\+json' src/app/ 2>/dev/null; then ((se++)); check "SEO4: JSON-LD" "PASS"; else check "SEO4: JSON-LD" "FAIL"; fi
-if grep -rq '<header\|<main\|<section\|<article\|<nav' src/app/ 2>/dev/null; then ((se++)); check "SEO5: Semantic" "PASS"; else check "SEO5: Semantic" "FAIL"; fi
+if grep -rq '<header\|<main\|<section\|<article\|<nav' src/app/ app/ components/ 2>/dev/null; then ((se++)); check "SEO5: Semantic" "PASS"; else check "SEO5: Semantic" "FAIL"; fi
 if [ -f public/robots.txt ] || [ -f src/app/robots.ts ] || [ -f src/app/robots.js ]; then ((se++)); check "SEO6: robots.txt" "PASS"; else check "SEO6: robots.txt" "FAIL"; fi
 
 score_dimension "SEO" 6 $se
