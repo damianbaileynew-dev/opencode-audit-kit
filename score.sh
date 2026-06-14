@@ -1037,7 +1037,7 @@ echo -e "${BOLD}🎨 UX${NC}"
 u=0
 
 if grep -rq 'search\|filterTasks\|renderFiltered\|handleSearch\|SearchBar' src/app/ 2>/dev/null; then ((u++)); check "U1: Search works" "PASS"; else check "U1: Search works" "FAIL"; fi
-if grep -rq 'filterSelect\|renderFiltered\|filterByStatus\|handleFilter\|FilterSelect' src/app/ 2>/dev/null; then ((u++)); check "U2: Filter works" "PASS"; else check "U2: Filter works" "FAIL"; fi
+if grep -rq 'filterSelect\|renderFiltered\|filterByStatus\|handleFilter\|FilterSelect\|applyFilter' src/app/ 2>/dev/null; then ((u++)); check "U2: Filter works" "PASS"; else check "U2: Filter works" "FAIL"; fi
 if grep -rq 'error-msg\|showError\|loginError\|error-message\|error.*feedback\|setError\|errorMessage' src/app/ 2>/dev/null; then ((u++)); check "U3: Error feedback" "PASS"; else check "U3: Error feedback" "FAIL"; fi
 if grep -rq 'modal.*close\|closeModal\|refreshTasks\|showTasks\|setTasks\|mutate\|onSubmit' src/app/ 2>/dev/null; then ((u++)); check "U4: Create feedback" "PASS"; else check "U4: Create feedback" "FAIL"; fi
 if grep -rq 'spinner\|loading\|Loading\|isLoading\|Suspense' src/app/ 2>/dev/null; then ((u++)); check "U5: Loading state" "PASS"; else check "U5: Loading state" "FAIL"; fi
