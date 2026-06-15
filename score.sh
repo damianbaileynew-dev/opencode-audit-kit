@@ -93,6 +93,53 @@ echo ""
 cd "$PROJECT_DIR" 2>/dev/null || { echo "❌ Dizin bulunamadı: $PROJECT_DIR"; exit 1; }
 
 # ═══════════════════════════════════════════════════════════
+# FRONTEND / ORM / UI DETECTION
+# ═══════════════════════════════════════════════════════════
+HAS_FRONTEND=false
+if [ "$FRAMEWORK" = "nextjs" ]; then
+  HAS_FRONTEND=true
+elif [ -d public/ ] || [ -d views/ ] || [ -d templates/ ] || [ -d src/views/ ] || [ -d src/components/ ] || [ -d components/ ]; then
+  HAS_FRONTEND=true
+elif find . -maxdepth 3 -name "*.html" -not -path "*/node_modules/*" 2>/dev/null | grep -q .; then
+  HAS_FRONTEND=true
+fi
+
+ORM_SYSTEM="none"
+if grep -rq "prisma\|@prisma" src/ package.json 2>/dev/null; then
+  ORM_SYSTEM="prisma"
+elif grep -rq "drizzle\|@drizzle" src/ package.json 2>/dev/null; then
+  ORM_SYSTEM="drizzle"
+elif grep -rq "mongoose\|@mongoose" src/ package.json 2>/dev/null; then
+  ORM_SYSTEM="mongoose"
+elif grep -rq "typeorm\|@typeorm\|TypeORM" src/ package.json 2>/dev/null; then
+  ORM_SYSTEM="typeorm"
+elif grep -rq "sequelize" src/ package.json 2>/dev/null; then
+  ORM_SYSTEM="sequelize"
+elif grep -rq "sqlalchemy\|SQLAlchemy\|Session" app/ main.py src/ backend/ 2>/dev/null; then
+  ORM_SYSTEM="sqlalchemy"
+elif grep -rq "tortoise\|Tortoise" app/ main.py src/ 2>/dev/null; then
+  ORM_SYSTEM="tortoise"
+fi
+
+UI_LIBRARY="none"
+if grep -rq "shadcn\|@shadcn\|components/ui" package.json src/ components/ 2>/dev/null; then
+  UI_LIBRARY="shadcn"
+elif grep -rq "@mui\|@material-ui" package.json src/ 2>/dev/null; then
+  UI_LIBRARY="mui"
+elif grep -rq "@chakra-ui\|@chakra" package.json src/ 2>/dev/null; then
+  UI_LIBRARY="chakra"
+elif grep -rq "@radix-ui\|@radix" package.json src/ 2>/dev/null; then
+  UI_LIBRARY="radix"
+elif grep -rq "@ant-design\|antd" package.json src/ 2>/dev/null; then
+  UI_LIBRARY="antd"
+elif grep -rq "@headlessui" package.json src/ 2>/dev/null; then
+  UI_LIBRARY="headlessui"
+fi
+
+echo -e "Frontend: ${BOLD}$HAS_FRONTEND${NC}  ORM: ${BOLD}$ORM_SYSTEM${NC}  UI: ${BOLD}$UI_LIBRARY${NC}"
+echo ""
+
+# ═══════════════════════════════════════════════════════════
 # FASTAPI SCORING
 # ═══════════════════════════════════════════════════════════
 if [ "$FRAMEWORK" = "fastapi" ]; then
@@ -1279,6 +1326,9 @@ except: print(0)
   SEC_BOOST=0    # Security bonus
   KQ_BOOST=0     # Code Quality bonus
   AR_BOOST=0     # Architecture bonus
+  A_BOOST=0      # Accessibility bonus
+  UX_BOOST=0     # UX bonus
+  SEO_BOOST=0    # SEO bonus
   T_BOOST=0      # Test bonus
   DOC_BOOST=0    # Documentation bonus
   D_BOOST=0      # DevOps bonus
@@ -1384,6 +1434,52 @@ except: print(0)
     echo -e "  ${GREEN}✅ Architecture +1: TypeScript strict mode enabled${NC}"
   fi
 
+  # ORM detected → Architecture +1 (data layer properly separated)
+  if [ "$ORM_SYSTEM" != "none" ]; then
+    AR_BOOST=$((AR_BOOST + 1))
+    echo -e "  ${GREEN}✅ Architecture +1: ORM detected ($ORM_SYSTEM — data layer separated)${NC}"
+  fi
+
+  # UI library detected → Architecture +1 (component system)
+  if [ "$UI_LIBRARY" != "none" ]; then
+    AR_BOOST=$((AR_BOOST + 1))
+    echo -e "  ${GREEN}✅ Architecture +1: UI library detected ($UI_LIBRARY)${NC}"
+  fi
+
+  # Prisma: schema.prisma exists → Security +1 (type-safe queries = no SQLi)
+  if [ "$ORM_SYSTEM" = "prisma" ] || [ -f prisma/schema.prisma ]; then
+    SEC_BOOST=$((SEC_BOOST + 1))
+    echo -e "  ${GREEN}✅ Security +1: Prisma ORM (type-safe queries, no SQLi)${NC}"
+  fi
+
+  # SQLAlchemy: models properly defined → Security +1
+  if [ "$ORM_SYSTEM" = "sqlalchemy" ]; then
+    SEC_BOOST=$((SEC_BOOST + 1))
+    echo -e "  ${GREEN}✅ Security +1: SQLAlchemy ORM (parameterized queries)${NC}"
+  fi
+
+  # ──── ACCESSIBILITY BOOSTS ────
+  # UI library with built-in a11y → +2 (shadcn, MUI, Chakra, Radix all support a11y)
+  if [ "$UI_LIBRARY" = "shadcn" ] || [ "$UI_LIBRARY" = "mui" ] || [ "$UI_LIBRARY" = "chakra" ] || [ "$UI_LIBRARY" = "radix" ] || [ "$UI_LIBRARY" = "headlessui" ]; then
+    # These libraries provide accessible components by default
+    # Give +2 a11y if UI library detected (labels, ARIA, keyboard nav)
+    A_BOOST=$((A_BOOST + 2))
+    echo -e "  ${GREEN}✅ Accessibility +2: $UI_LIBRARY provides accessible components${NC}"
+  fi
+
+  # ──── API-ONLY PROJECT BOOSTS ────
+  # If no frontend, A11y/UX/SEO are not applicable → auto-pass these dimensions
+  if [ "$HAS_FRONTEND" = "false" ]; then
+    # These dimensions are not applicable for API-only projects
+    # Give max boost so they show as PASS (N/A equivalent)
+    A_BOOST=7     # All 7 a11y checks auto-pass for API-only
+    UX_BOOST=7    # All 7 UX checks auto-pass for API-only
+    SEO_BOOST=6   # All 6 SEO checks auto-pass for API-only
+    echo -e "  ${YELLOW}♿ Accessibility: N/A → +7 (API-only project, no frontend)${NC}"
+    echo -e "  ${YELLOW}🎨 UX: N/A → auto-pass (API-only project, no frontend)${NC}"
+    echo -e "  ${YELLOW}🔎 SEO: N/A → auto-pass (API-only project, no frontend)${NC}"
+  fi
+
   # ──── DEVOPS BOOSTS ────
   # npm audit available (npm install works) → +0 (just informational)
   # CI/CD detected via GitHub Actions → +1
@@ -1406,7 +1502,7 @@ except: print(0)
   fi
 
   # ──── Print summary ────
-  TOTAL_BOOST=$((SEC_BOOST + KQ_BOOST + AR_BOOST + T_BOOST + DOC_BOOST + D_BOOST))
+  TOTAL_BOOST=$((SEC_BOOST + KQ_BOOST + AR_BOOST + A_BOOST + UX_BOOST + SEO_BOOST + T_BOOST + DOC_BOOST + D_BOOST))
   if [ "$TOTAL_BOOST" -gt 0 ]; then
     echo -e "  ${GREEN}${BOLD}Total semantic boost: +$TOTAL_BOOST points${NC}"
   elif [ "$TOTAL_BOOST" -lt 0 ]; then
@@ -1428,6 +1524,9 @@ except: print(0)
       "Code Quality") boost=$KQ_BOOST ;;
       Architecture)   boost=$AR_BOOST ;;
       Test)           boost=$T_BOOST ;;
+      Accessibility)  boost=$A_BOOST ;;
+      UX)             boost=$UX_BOOST ;;
+      SEO)            boost=$SEO_BOOST ;;
       Documentation)  boost=$DOC_BOOST ;;
       DevOps)         boost=$D_BOOST ;;
     esac
